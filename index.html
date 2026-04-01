@@ -383,7 +383,7 @@
   </button>
   <div class="tabs" style="margin-bottom:0">
     <span style="font-size:11px;color:#aaa;align-self:center">Mock:</span>
-    <button class="tab active" onclick="loadMock('noEmpty')"  id="tab-noEmpty">No empty</button>
+    <button class="tab" onclick="loadMock('noEmpty')"  id="tab-noEmpty">No empty</button>
     <button class="tab"        onclick="loadMock('mixed')"    id="tab-mixed">Mixed empty</button>
     <button class="tab"        onclick="loadMock('oos')"      id="tab-oos">OOS + Misplaced</button>
   </div>
@@ -836,7 +836,7 @@ function loadMock(key) {
 }
 
 /* ── Init ── */
-loadMock('oos');
+renderCanvas();
 </script>
 </body>
 </html>
