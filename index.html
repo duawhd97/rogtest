@@ -1,581 +1,842 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Realogram — Layout Test</title>
+  <title>Virtual Realogram v4</title>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
-
     body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #f4f4f2;
+      font-family: 'Segoe UI', Arial, 'Noto Sans', sans-serif;
+      background: #f0f0ee;
       padding: 24px;
       color: #1a1a1a;
+      font-size: 13px;
     }
 
-    h1 {
-      font-size: 16px;
-      font-weight: 500;
-      margin-bottom: 4px;
-    }
+    h1 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
+    .subtitle { font-size: 11px; color: #999; margin-bottom: 18px; }
 
-    .subtitle {
-      font-size: 12px;
-      color: #888;
-      margin-bottom: 24px;
+    /* ── Panel ── */
+    .panel {
+      background: white;
+      border: 0.5px solid #ddd;
+      border-radius: 10px;
+      padding: 16px 18px;
+      margin-bottom: 14px;
+    }
+    .panel-title {
+      font-size: 11px; font-weight: 600;
+      text-transform: uppercase; letter-spacing: 0.07em;
+      color: #999; margin-bottom: 12px;
     }
 
     /* ── Controls ── */
-    .controls {
-      background: white;
-      border: 0.5px solid #ddd;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 16px;
-      align-items: center;
-    }
+    .controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+    .cg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #555; }
+    input[type="range"] { width: 100px; }
+    input[type="number"] { width: 52px; padding: 3px 6px; border: 0.5px solid #ccc; border-radius: 5px; font-size: 12px; }
+    input[type="checkbox"] { cursor: pointer; }
 
-    .control-group {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 13px;
-      color: #555;
-    }
-
-    .control-group label { white-space: nowrap; }
-
-    input[type="range"] { width: 120px; }
-
-    input[type="number"] {
-      width: 60px;
-      padding: 4px 6px;
-      border: 0.5px solid #ccc;
-      border-radius: 5px;
-      font-size: 13px;
-    }
-
+    /* ── Buttons ── */
     button {
-      padding: 6px 14px;
-      font-size: 13px;
-      border: 0.5px solid #ccc;
-      border-radius: 6px;
-      background: white;
-      cursor: pointer;
+      padding: 5px 12px; font-size: 12px;
+      border: 0.5px solid #ccc; border-radius: 6px;
+      background: white; cursor: pointer; transition: background 0.1s;
     }
     button:hover { background: #f5f5f5; }
-    button.primary {
-      background: #1a1a1a;
-      color: white;
-      border-color: #1a1a1a;
-    }
-    button.primary:hover { background: #333; }
+    button.btn-primary { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+    button.btn-primary:hover { background: #333; }
+    button.btn-sm { padding: 3px 8px; font-size: 11px; }
+    button.btn-danger { color: #c0392b; border-color: #e0b0aa; }
+    button.btn-danger:hover { background: #fff5f5; }
 
-    /* ── Realogram Container ── */
-    .realogram-container {
-      width: 100%;
-      max-width: 960px;
-      margin: 0 auto;
-    }
-
-    .shelf-row {
-      display: flex;
-      width: 100%;
-      /* height는 JS에서 주입 */
-      border: 1px solid #d0d0d0;
-      border-radius: 6px;
-      overflow: hidden;
-      margin-bottom: 6px;
-      background: #f0f0ee;
-    }
-
-    .shelf-cell {
-      /* flex-basis는 JS에서 주입 */
-      height: 100%;
-      flex-shrink: 0;
-      background: #ffffff;
-      border-right: 0.5px solid #e0e0e0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      overflow: hidden;
-      position: relative;
-      transition: background 0.15s;
-    }
-
-    .shelf-cell:last-child { border-right: none; }
-
-    .shelf-cell:hover { background: #fafafa; }
-
-    /* 핵심: object-fit contain */
-    .shelf-cell img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
-      display: block;
-    }
-
-    /* OOS placeholder */
-    .shelf-cell.oos {
-      background: #f9f9f9;
-    }
-
-    .oos-inner {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 4px;
-      width: 100%;
-      height: 100%;
-    }
-
-    .oos-icon {
-      width: 28px;
-      height: 28px;
-      border: 1.5px dashed #bbb;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      color: #bbb;
-      font-size: 16px;
-    }
-
-    .oos-label {
-      font-size: 10px;
-      font-weight: 500;
-      color: #bbb;
-      letter-spacing: 0.05em;
-    }
-
-    /* 셀 너비 퍼센트 툴팁 */
-    .cell-pct {
-      position: absolute;
-      bottom: 3px;
-      right: 4px;
-      font-size: 9px;
-      color: #bbb;
-      pointer-events: none;
-    }
-
-    /* ── Image Upload Area ── */
-    .upload-section {
-      background: white;
-      border: 0.5px solid #ddd;
-      border-radius: 10px;
-      padding: 16px 20px;
-      margin-bottom: 20px;
-    }
-
-    .upload-section h2 {
-      font-size: 13px;
-      font-weight: 500;
-      margin-bottom: 12px;
-      color: #555;
-    }
-
+    /* ── Drop Zone ── */
     .drop-zone {
-      border: 1.5px dashed #ccc;
-      border-radius: 8px;
-      padding: 24px;
-      text-align: center;
-      font-size: 13px;
-      color: #999;
-      cursor: pointer;
+      border: 1.5px dashed #ccc; border-radius: 8px;
+      padding: 16px 12px; text-align: center;
+      font-size: 12px; color: #999; cursor: pointer;
       transition: border-color 0.15s;
     }
     .drop-zone:hover, .drop-zone.drag-over { border-color: #888; color: #555; }
+    .drop-zone small { display: block; font-size: 10px; color: #bbb; margin-top: 3px; }
 
-    .image-slots {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-      margin-top: 12px;
+    /* ── Image Library ── */
+    .img-library {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
     }
-
-    .image-slot {
+    .img-card {
       width: 80px;
-      height: 80px;
-      border: 0.5px solid #ddd;
-      border-radius: 6px;
-      overflow: hidden;
+      border: 1.5px solid #e0e0e0; border-radius: 7px;
+      overflow: hidden; background: white;
+      cursor: pointer; transition: border-color 0.15s;
       position: relative;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      background: #f9f9f9;
+    }
+    .img-card:hover { border-color: #aaa; }
+    .img-card.selected { border-color: #1a1a1a; }
+    .img-card .thumb {
+      width: 100%; height: 64px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f9f9f9; overflow: hidden;
+    }
+    .img-card .thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .img-card .img-label {
+      font-size: 9px; color: #888; padding: 3px 4px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      text-align: center; background: white;
+    }
+    .img-card .img-idx {
+      position: absolute; top: 3px; left: 4px;
+      font-size: 8px; font-weight: 600; color: #fff;
+      background: rgba(0,0,0,0.4); padding: 1px 4px; border-radius: 3px;
+    }
+    .img-card .remove-img {
+      position: absolute; top: 2px; right: 3px;
+      width: 14px; height: 14px;
+      background: rgba(0,0,0,0.4); border: none; border-radius: 50%;
+      color: white; font-size: 9px; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; padding: 0;
     }
 
-    .image-slot img {
-      width: 100%;
-      height: 100%;
-      object-fit: contain;
+    /* ── Row Builder ── */
+    .row-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+    .row-item {
+      border: 0.5px solid #e5e5e5; border-radius: 8px;
+      padding: 8px 10px; background: #fafafa;
     }
+    .row-item-header {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px;
+    }
+    .row-item-header .row-label { font-size: 11px; color: #666; font-weight: 500; }
+    .row-item-header .row-actions { margin-left: auto; display: flex; gap: 6px; }
 
-    .image-slot .remove-btn {
-      position: absolute;
-      top: 2px;
-      right: 2px;
-      width: 16px;
-      height: 16px;
-      background: rgba(0,0,0,0.5);
-      border: none;
-      border-radius: 50%;
-      color: white;
+    .cell-slots { display: flex; flex-wrap: wrap; gap: 6px; }
+    .cell-slot {
+      width: 90px; border: 1px solid #e0e0e0; border-radius: 6px;
+      background: white; overflow: hidden;
       font-size: 10px;
+    }
+    .cell-slot .slot-thumb {
+      width: 100%; height: 56px;
+      display: flex; align-items: center; justify-content: center;
+      background: #f5f5f5; overflow: hidden; position: relative; cursor: pointer;
+    }
+    .cell-slot .slot-thumb img { width: 100%; height: 100%; object-fit: contain; }
+    .cell-slot .slot-thumb.is-empty {
+      background: #f0ede8;
+      flex-direction: column; gap: 3px;
+    }
+    .slot-empty-icon {
+      width: 18px; height: 18px;
+      border: 1.5px dashed #ccc; border-radius: 3px;
+    }
+    .slot-empty-text { font-size: 8px; color: #bbb; text-transform: uppercase; letter-spacing: 0.04em; }
+    .cell-slot .slot-thumb .assign-hint {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.35); color: white;
+      font-size: 9px; display: none;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 4px;
+    }
+    .cell-slot .slot-thumb:hover .assign-hint { display: flex; }
+
+    .cell-slot .slot-controls {
+      padding: 4px 4px 5px;
+      display: flex; flex-direction: column; gap: 3px;
+    }
+    .slot-status-row { display: flex; gap: 4px; align-items: center; }
+    .status-btn {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid transparent;
+      cursor: pointer; transition: all 0.12s;
+      flex-shrink: 0; padding: 0; background: #d0d0ce;
+      position: relative;
+    }
+    .status-btn:hover { transform: scale(1.18); }
+    .status-btn.sb-normal    { background: #d0d0ce; }
+    .status-btn.sb-oos       { background: #e8001e; }
+    .status-btn.sb-misplaced { background: #00b0e8; }
+    .status-btn.sb-low       { background: #f5c800; }
+    .status-btn.active { border-color: #1a1a1a; box-shadow: 0 0 0 1px #fff inset; transform: scale(1.15); }
+    .status-btn .sb-check {
+      display: none; position: absolute; inset: 0;
+      align-items: center; justify-content: center;
+      font-size: 9px; color: white; font-weight: 700; pointer-events: none;
+    }
+    .status-btn.sb-low .sb-check { color: #555; }
+    .status-btn.active .sb-check { display: flex; }
+
+    .slot-bottom-row { display: flex; gap: 3px; }
+    .slot-img-selector {
+      flex: 1; font-size: 9px; padding: 2px 3px;
+      border: 0.5px solid #ddd; border-radius: 3px; background: white;
       cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 0;
+    }
+    .slot-remove {
+      font-size: 9px; padding: 2px 5px;
+      border: 0.5px solid #e0b0aa; border-radius: 3px;
+      background: white; color: #c0392b; cursor: pointer;
+    }
+    .slot-remove:hover { background: #fff5f5; }
+
+    /* ── Realogram Canvas ── */
+    .realogram-outer {
+      background: #e8e8e6; border: 0.5px solid #d0d0ce;
+      border-radius: 12px; padding: 12px;
+      margin-bottom: 14px;
+    }
+    .realogram-container { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+
+    /* Shelf row = rounded box with inner padding, like a physical shelf */
+    .shelf-row {
+      display: flex; width: 100%;
+      background: white;
+      border: 1.5px solid #d0d0ce;
+      border-radius: 8px;
+      overflow: hidden;
+      padding: 4px;
+      gap: 4px;
     }
 
-    /* ── Mock data selector ── */
-    .mock-selector {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
+    /* Each cell is a separate rounded white box */
+    .r-cell {
+      flex-shrink: 0;
+      height: 100%;
+      position: relative; overflow: hidden;
+      border-radius: 5px;
+      display: flex; align-items: center; justify-content: center;
+      border: 1px solid #e0e0de;
+      background: white;
     }
 
-    .mock-btn {
-      font-size: 12px;
-      padding: 4px 10px;
+    /* Normal */
+    .r-cell.st-normal { background: white; }
+    .r-cell.st-normal:hover { background: #fafafa; }
+
+    /* Empty */
+    .r-cell.st-empty { background: #f2f0ec; border: 1px dashed #c8c5bf; }
+    .empty-inner2 {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+    }
+    .empty-box {
+      width: 22px; height: 22px;
+      border: 1.5px dashed #ccc; border-radius: 4px;
     }
 
-    .section-title {
-      font-size: 12px;
-      font-weight: 500;
-      color: #888;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      margin-bottom: 10px;
+    /* Cell image */
+    .r-cell img {
+      width: 100%; height: 100%; object-fit: contain; display: block;
     }
 
-    .divider {
-      border: none;
-      border-top: 0.5px solid #e5e5e5;
-      margin: 16px 0;
+    /* Status badge overlay — top bar */
+    .status-badge {
+      position: absolute; top: 0; left: 0; right: 0;
+      font-size: 10px; font-weight: 700;
+      text-align: center; padding: 3px 0;
+      letter-spacing: 0.05em; z-index: 2;
+      pointer-events: none;
+      border-radius: 4px 4px 0 0;
     }
+    .badge-oos       { background: #e8001e; color: white; }
+    .badge-misplaced { background: #00b0e8; color: white; }
+    .badge-low       { background: #f5c800; color: #333; }
 
-    .info-bar {
-      font-size: 11px;
-      color: #aaa;
-      margin-bottom: 10px;
+    /* Status border — replaces outline so it works with border-radius */
+    .border-oos       { border: 2.5px solid #e8001e !important; }
+    .border-misplaced { border: 2.5px solid #00b0e8 !important; }
+    .border-low       { border: 2.5px solid #f5c800 !important; }
+
+    /* % label */
+    .cell-pct { position: absolute; bottom: 2px; right: 3px; font-size: 8px; color: #ccc; pointer-events: none; }
+
+    /* ── Stats ── */
+    .stats-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+    .stat-pill {
+      display: flex; align-items: center; gap: 5px;
+      font-size: 11px; color: #666;
+      background: white; border: 0.5px solid #e5e5e5;
+      padding: 3px 10px; border-radius: 20px;
     }
+    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ── Scenario tabs ── */
+    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+    .tab {
+      padding: 5px 13px; font-size: 12px;
+      border: 0.5px solid #ccc; border-radius: 20px;
+      background: white; cursor: pointer;
+    }
+    .tab:hover { border-color: #888; }
+    .tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
+
+    .divider { border: none; border-top: 0.5px solid #eee; margin: 12px 0; }
+
+    .add-row-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
+
+    /* Selecting image for slot */
+    .img-picker-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.5); z-index: 100;
+      align-items: center; justify-content: center;
+    }
+    .img-picker-overlay.open { display: flex; }
+    .img-picker-box {
+      background: white; border-radius: 12px;
+      padding: 20px; width: 420px; max-width: 95vw;
+      max-height: 80vh; overflow-y: auto;
+    }
+    .img-picker-box h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
+    .picker-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+    .picker-item {
+      width: 72px; border: 1.5px solid #e0e0e0; border-radius: 7px;
+      overflow: hidden; cursor: pointer; transition: border-color 0.1s;
+    }
+    .picker-item:hover { border-color: #1a1a1a; }
+    .picker-item img { width: 100%; height: 60px; object-fit: contain; background: #f9f9f9; display: block; }
+    .picker-item .picker-label { font-size: 8px; color: #888; padding: 2px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .picker-empty-btn {
+      width: 72px; height: 78px; border: 1.5px dashed #ccc;
+      border-radius: 7px; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 4px;
+      cursor: pointer; font-size: 9px; color: #aaa;
+      background: #f8f8f8;
+    }
+    .picker-empty-btn:hover { border-color: #888; color: #555; }
+    .picker-close { margin-top: 12px; width: 100%; }
   </style>
 </head>
 <body>
 
-<h1>Virtual Realogram — Layout Test</h1>
-<p class="subtitle">object-fit: contain 기반 셀 렌더링 · bbox 너비 비율 기반 셀 크기</p>
+<h1>Virtual Realogram v4</h1>
+<p class="subtitle">Upload product images · assign status per cell · mix with empty slots</p>
 
-<!-- Controls -->
-<div class="controls">
-  <div class="control-group">
-    <label>Row 높이</label>
-    <input type="range" id="rowHeight" min="60" max="240" value="120" oninput="updateRowHeight(this.value)">
-    <span id="rowHeightVal">120px</span>
+<!-- ══════════════════════════════
+     SECTION 1: Controls
+══════════════════════════════ -->
+<div class="panel">
+  <div class="panel-title">Display Settings</div>
+  <div class="controls">
+    <div class="cg">
+      <label>Row height</label>
+      <input type="range" id="rowHeight" min="80" max="260" value="160" oninput="onRowHeight(this.value)">
+      <span id="rowHeightVal">160px</span>
+    </div>
+    <div class="cg">
+      <label>Max width</label>
+      <input type="number" id="maxWidth" value="960" min="400" max="1600" step="10" oninput="onMaxWidth(this.value)">
+      <span>px</span>
+    </div>
+    <div class="cg">
+      <label>Show %</label>
+      <input type="checkbox" id="showPct" checked onchange="renderCanvas()">
+    </div>
   </div>
-  <div class="control-group">
-    <label>컨테이너 최대 너비</label>
-    <input type="number" id="maxWidth" value="960" min="300" max="1400" step="10" oninput="updateMaxWidth(this.value)">
-    <span>px</span>
-  </div>
-  <div class="control-group">
-    <label>셀 배경</label>
-    <input type="color" id="cellBg" value="#ffffff" oninput="updateCellBg(this.value)">
-  </div>
-  <div class="control-group">
-    <label>너비 % 표시</label>
-    <input type="checkbox" id="showPct" checked onchange="togglePct(this.checked)">
-  </div>
-  <button class="primary" onclick="rerenderAll()">다시 렌더</button>
 </div>
 
-<!-- Mock Data Section -->
-<div class="upload-section">
-  <h2>테스트 데이터 선택</h2>
-  <div class="section-title">Mock 시나리오</div>
-  <div class="mock-selector">
-    <button class="mock-btn" onclick="loadMock('convenience')">편의점 과자 선반</button>
-    <button class="mock-btn" onclick="loadMock('wine')">와인 + 음료 (세로형 혼합)</button>
-    <button class="mock-btn" onclick="loadMock('mixed')">혼합형 (라면+칫솔+박스)</button>
-  </div>
-
-  <hr class="divider">
-
-  <div class="section-title">실제 이미지로 테스트</div>
+<!-- ══════════════════════════════
+     SECTION 2: Image Library
+══════════════════════════════ -->
+<div class="panel">
+  <div class="panel-title">1 · Image Library</div>
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-    이미지를 드래그하거나 클릭해서 업로드 (여러 장 가능)<br>
-    <span style="font-size:11px;color:#bbb">업로드한 이미지는 순서대로 셀에 배치됩니다</span>
+    Drag & drop or click to upload product images
+    <small>Multiple files supported</small>
   </div>
   <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
-  <div class="image-slots" id="imageSlots"></div>
-
-  <div style="margin-top:12px;display:flex;gap:8px;align-items:center;">
-    <div class="control-group">
-      <label>행당 셀 수</label>
-      <input type="number" id="cellsPerRow" value="4" min="1" max="12" style="width:50px">
-    </div>
-    <button onclick="renderFromUploads()">업로드 이미지로 렌더</button>
+  <div class="img-library" id="imgLibrary"></div>
+  <div id="libraryActions" style="margin-top:10px;display:none;gap:8px">
+    <button class="btn-sm btn-danger" onclick="clearLibrary()">Clear all</button>
   </div>
 </div>
 
-<!-- Realogram Output -->
-<div class="info-bar" id="infoBar"></div>
-<div class="realogram-container" id="realogramContainer"></div>
+<!-- ══════════════════════════════
+     SECTION 3: Shelf Layout Builder
+══════════════════════════════ -->
+<div class="panel">
+  <div class="panel-title">2 · Shelf Layout Builder</div>
+
+  <div class="add-row-bar">
+    <div class="cg">
+      <label>Cells in new row</label>
+      <input type="number" id="newRowCells" value="5" min="1" max="16" style="width:48px">
+    </div>
+    <button onclick="addRow()">+ Add shelf row</button>
+    <button onclick="autoFill()">Auto-fill from library</button>
+    <button class="btn-danger btn-sm" onclick="clearAllRows()" style="margin-left:auto">Clear all rows</button>
+  </div>
+
+  <div class="row-list" id="rowList">
+    <div style="font-size:11px;color:#bbb;padding:8px 0;text-align:center">
+      Add shelf rows above, then assign images and statuses to each cell.
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     Render Button
+══════════════════════════════ -->
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+  <button class="btn-primary" onclick="renderCanvas()" style="padding:8px 20px;font-size:13px">
+    Render Realogram ↓
+  </button>
+  <div class="tabs" style="margin-bottom:0">
+    <span style="font-size:11px;color:#aaa;align-self:center">Mock:</span>
+    <button class="tab active" onclick="loadMock('noEmpty')"  id="tab-noEmpty">No empty</button>
+    <button class="tab"        onclick="loadMock('mixed')"    id="tab-mixed">Mixed empty</button>
+    <button class="tab"        onclick="loadMock('oos')"      id="tab-oos">OOS + Misplaced</button>
+  </div>
+</div>
+
+<!-- ══════════════════════════════
+     REALOGRAM CANVAS
+══════════════════════════════ -->
+<div class="stats-bar" id="statsBar"></div>
+<div class="realogram-outer">
+  <div class="realogram-container" id="realogramContainer"></div>
+</div>
+
+<!-- ══════════════════════════════
+     Image Picker Modal
+══════════════════════════════ -->
+<div class="img-picker-overlay" id="pickerOverlay">
+  <div class="img-picker-box">
+    <h3>Select image for this cell</h3>
+    <div class="picker-grid" id="pickerGrid"></div>
+    <button class="picker-close btn-sm" onclick="closePicker()">Cancel</button>
+  </div>
+</div>
 
 <script>
-  /* ─── State ─── */
-  let currentRowHeight = 120;
-  let currentMaxWidth = 960;
-  let currentCellBg = '#ffffff';
-  let showPct = true;
-  let uploadedImages = [];   // { url, name }
-  let currentData = null;    // [row] where row = [{ label, bboxW, type }]
+/* ═══════════════════════
+   State
+═══════════════════════ */
+let images   = [];    // { url, name }
+let shelfRows = [];   // [{ cells: [{ imgIdx|null, status:'normal'|'oos'|'misplaced'|'low'|'empty', bboxW:100 }] }]
+let rowHeightPx = 160;
+let maxWidthPx  = 960;
+let pickerTarget = null;  // { rowIdx, cellIdx }
 
-  /* ─── Mock Data ─── */
-  const MOCKS = {
-    convenience: [
-      [
-        { label: '탱글면 × 3\n(wide)', bboxW: 337, color: '#f5c4b3' },
-        { label: '비초비',             bboxW: 80,  color: '#c0dd97' },
-        { label: '컵라면',             bboxW: 55,  color: '#b5d4f4' },
-        { label: '초코파이\n찰떡',     bboxW: 160, color: '#fac775' },
-        { label: '초코파이\n찰떡2',    bboxW: 155, color: '#fac775' },
-      ],
-      [
-        { label: '칸쵸',              bboxW: 70,  color: '#f4c0d1' },
-        { label: '누텔라',            bboxW: 80,  color: '#d3d1c7' },
-        { label: '컵라면',            bboxW: 55,  color: '#b5d4f4' },
-        { label: '초코파이\n큰박스',  bboxW: 210, color: '#fac775' },
-        { label: '버터와플',          bboxW: 90,  color: '#c0dd97' },
-        { label: '버터와플2',         bboxW: 90,  color: '#c0dd97' },
-        { label: '조크픽',            bboxW: 65,  color: '#f5c4b3' },
-        { label: 'OOS',               bboxW: 60,  color: null, oos: true },
-      ],
-      [
-        { label: '나!나!\n과자',      bboxW: 130, color: '#f5c4b3' },
-        { label: '컵라면',            bboxW: 55,  color: '#b5d4f4' },
-        { label: '가나\n박스',        bboxW: 140, color: '#d3d1c7' },
-        { label: '탱글 컵',           bboxW: 75,  color: '#f4c0d1' },
-        { label: '에이스',            bboxW: 120, color: '#c0dd97' },
-        { label: '조크픽\n세트',      bboxW: 95,  color: '#fac775' },
-        { label: '칸쵸',              bboxW: 80,  color: '#f4c0d1' },
-      ],
+const STATUS_LIST = ['normal','oos','misplaced','low'];
+const STATUS_LABELS = { normal:'Normal', oos:'OOS', misplaced:'Misplaced', low:'LOW' };
+const STATUS_COLORS = { oos:'#e8001e', misplaced:'#00b0e8', low:'#f5c800', normal:'#e0e0e0' };
+
+/* ═══════════════════════
+   Image Library
+═══════════════════════ */
+const dropZone = document.getElementById('dropZone');
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+
+function handleFiles(files) {
+  Array.from(files).forEach(f => {
+    if (!f.type.startsWith('image/')) return;
+    const r = new FileReader();
+    r.onload = e => { images.push({ url: e.target.result, name: f.name }); refreshLibrary(); };
+    r.readAsDataURL(f);
+  });
+}
+
+function refreshLibrary() {
+  const lib = document.getElementById('imgLibrary');
+  lib.innerHTML = '';
+  images.forEach((img, i) => {
+    const card = document.createElement('div');
+    card.className = 'img-card';
+    card.innerHTML = `
+      <span class="img-idx">${i+1}</span>
+      <div class="thumb"><img src="${img.url}" alt=""></div>
+      <div class="img-label">${img.name}</div>
+      <button class="remove-img" onclick="removeImage(${i})">✕</button>
+    `;
+    lib.appendChild(card);
+  });
+  document.getElementById('libraryActions').style.display = images.length ? 'flex' : 'none';
+  refreshRowList();
+}
+
+function removeImage(i) {
+  images.splice(i, 1);
+  // Remap cell imgIdx references
+  shelfRows.forEach(row => row.cells.forEach(c => {
+    if (c.imgIdx === i) { c.imgIdx = null; c.status = 'empty'; }
+    else if (c.imgIdx > i) c.imgIdx--;
+  }));
+  refreshLibrary();
+}
+
+function clearLibrary() {
+  images = [];
+  shelfRows.forEach(row => row.cells.forEach(c => { c.imgIdx = null; c.status = 'empty'; }));
+  document.getElementById('fileInput').value = '';
+  refreshLibrary();
+}
+
+/* ═══════════════════════
+   Row Builder
+═══════════════════════ */
+function addRow(cells) {
+  const n = cells !== undefined ? cells : parseInt(document.getElementById('newRowCells').value) || 5;
+  shelfRows.push({ cells: Array.from({length: n}, () => ({ imgIdx: null, status: 'empty', bboxW: 100 })) });
+  refreshRowList();
+}
+
+function addCellToRow(rowIdx) {
+  shelfRows[rowIdx].cells.push({ imgIdx: null, status: 'empty', bboxW: 100 });
+  refreshRowList();
+}
+
+function removeCellFromRow(rowIdx, cellIdx) {
+  shelfRows[rowIdx].cells.splice(cellIdx, 1);
+  if (!shelfRows[rowIdx].cells.length) shelfRows.splice(rowIdx, 1);
+  refreshRowList();
+}
+
+function removeRow(rowIdx) {
+  shelfRows.splice(rowIdx, 1);
+  refreshRowList();
+}
+
+function clearAllRows() {
+  shelfRows = [];
+  refreshRowList();
+}
+
+function setStatus(rowIdx, cellIdx, status) {
+  const cell = shelfRows[rowIdx].cells[cellIdx];
+  cell.status = status;
+  if (status === 'empty') cell.imgIdx = null;
+  refreshRowList();
+}
+
+function autoFill() {
+  if (!images.length) { alert('Upload images first.'); return; }
+  const perRow = parseInt(document.getElementById('newRowCells').value) || 5;
+  shelfRows = [];
+  let idx = 0;
+  while (idx < images.length) {
+    const slice = Math.min(perRow, images.length - idx);
+    const row = { cells: [] };
+    for (let i = 0; i < slice; i++) {
+      row.cells.push({ imgIdx: idx, status: 'normal', bboxW: 100 });
+      idx++;
+    }
+    shelfRows.push(row);
+  }
+  refreshRowList();
+}
+
+function refreshRowList() {
+  const list = document.getElementById('rowList');
+  if (!shelfRows.length) {
+    list.innerHTML = '<div style="font-size:11px;color:#bbb;padding:8px 0;text-align:center">Add shelf rows above, then assign images and statuses to each cell.</div>';
+    return;
+  }
+  list.innerHTML = '';
+  shelfRows.forEach((row, ri) => {
+    const rowEl = document.createElement('div');
+    rowEl.className = 'row-item';
+
+    // Header
+    const header = document.createElement('div');
+    header.className = 'row-item-header';
+    header.innerHTML = `
+      <span class="row-label">Shelf row ${ri+1} — ${row.cells.length} cells</span>
+      <div class="row-actions">
+        <button class="btn-sm" onclick="addCellToRow(${ri})">+ cell</button>
+        <button class="btn-sm btn-danger" onclick="removeRow(${ri})">Remove row</button>
+      </div>
+    `;
+    rowEl.appendChild(header);
+
+    // Cell slots
+    const slots = document.createElement('div');
+    slots.className = 'cell-slots';
+
+    row.cells.forEach((cell, ci) => {
+      const slot = document.createElement('div');
+      slot.className = 'cell-slot';
+
+      const hasImg = cell.imgIdx !== null && images[cell.imgIdx];
+      const isEff  = cell.status === 'empty' || !hasImg;
+
+      // Thumb
+      const thumb = document.createElement('div');
+      thumb.className = 'slot-thumb' + (isEff ? ' is-empty' : '');
+      thumb.onclick = () => openPicker(ri, ci);
+
+      if (hasImg && cell.status !== 'empty') {
+        thumb.innerHTML = `
+          <img src="${images[cell.imgIdx].url}" alt="">
+          <div class="assign-hint">Click to<br>change image</div>
+        `;
+      } else {
+        thumb.innerHTML = `
+          <div class="slot-empty-icon"></div>
+          <div class="slot-empty-text">empty</div>
+          <div class="assign-hint" style="display:flex">Click to<br>assign image</div>
+        `;
+      }
+      slot.appendChild(thumb);
+
+      // Controls
+      const ctrl = document.createElement('div');
+      ctrl.className = 'slot-controls';
+
+      // Status buttons — color dots
+      const statusRow = document.createElement('div');
+      statusRow.className = 'slot-status-row';
+      STATUS_LIST.forEach(s => {
+        const btn = document.createElement('button');
+        const isActive = cell.status === s;
+        btn.className = `status-btn sb-${s}${isActive ? ' active' : ''}`;
+        btn.title = STATUS_LABELS[s];
+        btn.innerHTML = `<span class="sb-check">✓</span>`;
+        btn.onclick = () => setStatus(ri, ci, s);
+        statusRow.appendChild(btn);
+      });
+      ctrl.appendChild(statusRow);
+
+      // Bottom: empty toggle + remove
+      const bottomRow = document.createElement('div');
+      bottomRow.className = 'slot-bottom-row';
+
+      const emptyBtn = document.createElement('button');
+      emptyBtn.className = 'slot-img-selector' + (cell.status === 'empty' ? ' active-empty' : '');
+      emptyBtn.textContent = cell.status === 'empty' ? '∅ Empty' : '∅ Set empty';
+      emptyBtn.style.cssText = cell.status === 'empty' ? 'background:#f0ede8;color:#999;border-color:#d0ccc5;' : '';
+      emptyBtn.onclick = () => setStatus(ri, ci, 'empty');
+
+      const removeBtn = document.createElement('button');
+      removeBtn.className = 'slot-remove';
+      removeBtn.textContent = '✕';
+      removeBtn.onclick = () => removeCellFromRow(ri, ci);
+
+      bottomRow.appendChild(emptyBtn);
+      bottomRow.appendChild(removeBtn);
+      ctrl.appendChild(bottomRow);
+
+      slot.appendChild(ctrl);
+      slots.appendChild(slot);
+    });
+
+    rowEl.appendChild(slots);
+    list.appendChild(rowEl);
+  });
+}
+
+/* ═══════════════════════
+   Image Picker Modal
+═══════════════════════ */
+function openPicker(rowIdx, cellIdx) {
+  pickerTarget = { rowIdx, cellIdx };
+  const grid = document.getElementById('pickerGrid');
+  grid.innerHTML = '';
+
+  // Empty option
+  const emptyOpt = document.createElement('div');
+  emptyOpt.className = 'picker-empty-btn';
+  emptyOpt.innerHTML = '<div style="font-size:18px;color:#ccc">∅</div><span>Set empty</span>';
+  emptyOpt.onclick = () => { assignImage(null); closePicker(); };
+  grid.appendChild(emptyOpt);
+
+  images.forEach((img, i) => {
+    const item = document.createElement('div');
+    item.className = 'picker-item';
+    item.innerHTML = `<img src="${img.url}" alt=""><div class="picker-label">${i+1}. ${img.name}</div>`;
+    item.onclick = () => { assignImage(i); closePicker(); };
+    grid.appendChild(item);
+  });
+
+  document.getElementById('pickerOverlay').classList.add('open');
+}
+
+function assignImage(imgIdx) {
+  if (!pickerTarget) return;
+  const cell = shelfRows[pickerTarget.rowIdx].cells[pickerTarget.cellIdx];
+  cell.imgIdx = imgIdx;
+  cell.status = imgIdx === null ? 'empty' : (cell.status === 'empty' ? 'normal' : cell.status);
+  refreshRowList();
+}
+
+function closePicker() {
+  document.getElementById('pickerOverlay').classList.remove('open');
+  pickerTarget = null;
+}
+
+document.getElementById('pickerOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePicker();
+});
+
+/* ═══════════════════════
+   Render Canvas
+═══════════════════════ */
+function renderCanvas() {
+  const showPct = document.getElementById('showPct').checked;
+  const container = document.getElementById('realogramContainer');
+  container.style.maxWidth = maxWidthPx + 'px';
+  container.innerHTML = '';
+
+  let tNormal=0, tEmpty=0, tOos=0, tMisplaced=0, tLow=0;
+
+  shelfRows.forEach(row => {
+    const totalW = row.cells.reduce((s,c) => s + (c.bboxW||100), 0);
+
+    const rowEl = document.createElement('div');
+    rowEl.className = 'shelf-row';
+    // Row height accounts for top/bottom padding (4px each) inside shelf-row
+    rowEl.style.height = (rowHeightPx + 8) + 'px';
+
+    row.cells.forEach(cell => {
+      const bboxW = cell.bboxW || 100;
+      const pct   = (bboxW / totalW * 100).toFixed(1);
+      const st    = cell.status;
+      const hasImg = st !== 'empty' && cell.imgIdx !== null && images[cell.imgIdx];
+
+      // Count
+      if (st === 'empty') tEmpty++;
+      else if (st === 'oos') tOos++;
+      else if (st === 'misplaced') tMisplaced++;
+      else if (st === 'low') tLow++;
+      else tNormal++;
+
+      const cellEl = document.createElement('div');
+      cellEl.className = `r-cell st-${hasImg ? st : (st === 'empty' ? 'empty' : 'normal')}`;
+      cellEl.style.flexBasis = pct + '%';
+      cellEl.style.height = rowHeightPx + 'px';
+      cellEl.style.flexShrink = '0';
+
+      // Border for special statuses
+      if (st === 'oos')       cellEl.classList.add('border-oos');
+      if (st === 'misplaced') cellEl.classList.add('border-misplaced');
+      if (st === 'low')       cellEl.classList.add('border-low');
+
+      // Image
+      if (hasImg) {
+        const img = document.createElement('img');
+        img.src = images[cell.imgIdx].url;
+        img.alt = '';
+        cellEl.appendChild(img);
+      } else if (st === 'empty') {
+        cellEl.innerHTML = `<div class="empty-inner2"><div class="empty-box"></div></div>`;
+      }
+
+      // Status badge (top bar) — not for normal
+      if (st !== 'normal' && st !== 'empty') {
+        const badge = document.createElement('div');
+        badge.className = `status-badge badge-${st}`;
+        badge.textContent = STATUS_LABELS[st];
+        cellEl.appendChild(badge);
+      }
+
+      // % label
+      if (showPct) {
+        const pctEl = document.createElement('span');
+        pctEl.className = 'cell-pct';
+        pctEl.textContent = pct + '%';
+        cellEl.appendChild(pctEl);
+      }
+
+      rowEl.appendChild(cellEl);
+    });
+
+    container.appendChild(rowEl);
+  });
+
+  // Stats
+  const total = tNormal + tEmpty + tOos + tMisplaced + tLow;
+  document.getElementById('statsBar').innerHTML = `
+    <div class="stat-pill"><div class="stat-dot" style="background:#bbb"></div>Total ${total}</div>
+    <div class="stat-pill"><div class="stat-dot" style="background:#ccc"></div>Normal ${tNormal}</div>
+    <div class="stat-pill"><div class="stat-dot" style="background:#d0ccc5"></div>Empty ${tEmpty}</div>
+    <div class="stat-pill"><div class="stat-dot" style="background:#e8001e"></div>OOS ${tOos}</div>
+    <div class="stat-pill"><div class="stat-dot" style="background:#00b0e8"></div>Misplaced ${tMisplaced}</div>
+    <div class="stat-pill"><div class="stat-dot" style="background:#f5c800"></div>LOW ${tLow}</div>
+  `;
+}
+
+/* ═══════════════════════
+   Controls
+═══════════════════════ */
+function onRowHeight(v) {
+  rowHeightPx = parseInt(v);
+  document.getElementById('rowHeightVal').textContent = v + 'px';
+  renderCanvas();
+}
+function onMaxWidth(v) {
+  maxWidthPx = parseInt(v) || 960;
+  renderCanvas();
+}
+
+/* ═══════════════════════
+   Mock Scenarios
+═══════════════════════ */
+const MOCK_COLORS = ['#f5c4b3','#c0dd97','#b5d4f4','#fac775','#f4c0d1','#d3d1c7','#cecbf6','#c0dd97','#f5c4b3'];
+
+function loadMock(key) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById(`tab-${key}`).classList.add('active');
+  images = [];
+  shelfRows = [];
+
+  const mockDefs = {
+    noEmpty: [
+      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
+      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
+      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
     ],
-
-    wine: [
-      [
-        { label: '레드 와인\n(tall)',  bboxW: 45,  color: '#cecbf6', aspectTall: true },
-        { label: '화이트와인\n(tall)', bboxW: 45,  color: '#cecbf6', aspectTall: true },
-        { label: '맥주캔',            bboxW: 60,  color: '#fac775' },
-        { label: '맥주캔2',           bboxW: 60,  color: '#fac775' },
-        { label: '소주',              bboxW: 50,  color: '#b5d4f4', aspectTall: true },
-        { label: '소주2',             bboxW: 50,  color: '#b5d4f4', aspectTall: true },
-        { label: '과일주스\n팩',      bboxW: 90,  color: '#c0dd97' },
-        { label: 'OOS',               bboxW: 55,  color: null, oos: true },
-      ],
-      [
-        { label: '로제 와인\n(tall)',  bboxW: 45,  color: '#f4c0d1', aspectTall: true },
-        { label: '스파클링\n(tall)',   bboxW: 48,  color: '#cecbf6', aspectTall: true },
-        { label: '막걸리\n(tall)',     bboxW: 60,  color: '#d3d1c7', aspectTall: true },
-        { label: '에너지드링크',       bboxW: 55,  color: '#c0dd97' },
-        { label: '에너지드링크2',      bboxW: 55,  color: '#c0dd97' },
-        { label: '커피음료',           bboxW: 70,  color: '#d3d1c7' },
-        { label: 'OOS',               bboxW: 48,  color: null, oos: true },
-      ],
-    ],
-
     mixed: [
-      [
-        { label: '라면 박스\n(wide)',  bboxW: 260, color: '#f5c4b3' },
-        { label: '컵라면',            bboxW: 70,  color: '#b5d4f4' },
-        { label: '칫솔\n(tall)',       bboxW: 30,  color: '#cecbf6', aspectTall: true },
-        { label: '칫솔2\n(tall)',      bboxW: 30,  color: '#cecbf6', aspectTall: true },
-        { label: '샴푸',              bboxW: 65,  color: '#c0dd97', aspectTall: true },
-      ],
-      [
-        { label: '과자 박스',         bboxW: 180, color: '#fac775' },
-        { label: '쿠크다스',          bboxW: 120, color: '#c0dd97' },
-        { label: '탱글면\n(wide)',     bboxW: 160, color: '#f5c4b3' },
-        { label: 'OOS',               bboxW: 70,  color: null, oos: true },
-        { label: '가나 초코',         bboxW: 90,  color: '#d3d1c7' },
-      ],
+      [{st:'normal'},{st:'empty'},{st:'normal'},{st:'empty'},{st:'normal'}],
+      [{st:'normal'},{st:'normal'},{st:'empty'},{st:'normal'},{st:'empty'},{st:'normal'}],
+      [{st:'empty'},{st:'empty'},{st:'normal'},{st:'normal'},{st:'empty'},{st:'normal'}],
+      [{st:'normal'},{st:'empty'},{st:'empty'},{st:'normal'},{st:'normal'}],
+    ],
+    oos: [
+      [{st:'low',bboxW:200},{st:'empty'},{st:'oos'},{st:'misplaced'},{st:'normal'}],
+      [{st:'normal'},{st:'normal'},{st:'oos'},{st:'normal'},{st:'oos',bboxW:200},{st:'misplaced'},{st:'normal'}],
+      [{st:'oos'},{st:'normal'},{st:'empty'},{st:'normal'},{st:'low'},{st:'normal'},{st:'normal'}],
+      [{st:'oos'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'misplaced',bboxW:200}],
+      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'oos'},{st:'empty'},{st:'normal'},{st:'normal'}],
     ],
   };
 
-  /* ─── Render ─── */
-  function renderRealogram(rows) {
-    currentData = rows;
-    const container = document.getElementById('realogramContainer');
-    container.style.maxWidth = currentMaxWidth + 'px';
-    container.innerHTML = '';
+  // Generate placeholder images (colored blocks) for mock
+  let imgCounter = 0;
+  const getImgIdx = (color) => {
+    const canvas = document.createElement('canvas');
+    canvas.width = 120; canvas.height = 120;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = color || MOCK_COLORS[imgCounter % MOCK_COLORS.length];
+    ctx.fillRect(0,0,120,120);
+    ctx.fillStyle = 'rgba(255,255,255,0.4)';
+    ctx.font = 'bold 24px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText(`P${imgCounter+1}`, 60, 68);
+    images.push({ url: canvas.toDataURL(), name: `Product ${imgCounter+1}` });
+    return imgCounter++;
+  };
 
-    rows.forEach((row, ri) => {
-      const totalW = row.reduce((s, item) => s + item.bboxW, 0);
-      const rowEl = document.createElement('div');
-      rowEl.className = 'shelf-row';
-      rowEl.style.height = currentRowHeight + 'px';
-
-      row.forEach((item, ci) => {
-        const pct = (item.bboxW / totalW * 100).toFixed(1);
-        const cell = document.createElement('div');
-        cell.className = 'shelf-cell' + (item.oos ? ' oos' : '');
-        cell.style.flexBasis = pct + '%';
-        cell.style.background = currentCellBg;
-
-        if (item.oos) {
-          cell.innerHTML = `
-            <div class="oos-inner">
-              <div class="oos-icon">✕</div>
-              <div class="oos-label">OOS</div>
-            </div>`;
-        } else if (item.url) {
-          // 실제 이미지
-          const img = document.createElement('img');
-          img.src = item.url;
-          img.alt = item.label || '';
-          cell.appendChild(img);
-        } else {
-          // Mock placeholder
-          const inner = document.createElement('div');
-          const isTall = item.aspectTall;
-          const h = isTall ? Math.round(currentRowHeight * 0.88) : Math.round(currentRowHeight * 0.68);
-          const w = isTall ? Math.round(currentRowHeight * 0.22) : Math.min(Math.round(item.bboxW / totalW * 700), 120);
-          inner.style.cssText = `
-            width: ${Math.max(w, 14)}px;
-            height: ${Math.min(h, currentRowHeight - 8)}px;
-            background: ${item.color};
-            border-radius: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 9px;
-            color: #555;
-            text-align: center;
-            line-height: 1.3;
-            white-space: pre-line;
-          `;
-          inner.textContent = item.label;
-          cell.appendChild(inner);
-        }
-
-        if (showPct) {
-          const pctEl = document.createElement('span');
-          pctEl.className = 'cell-pct';
-          pctEl.textContent = pct + '%';
-          cell.appendChild(pctEl);
-        }
-
-        rowEl.appendChild(cell);
+  mockDefs[key].forEach(rowDef => {
+    const row = { cells: [] };
+    rowDef.forEach(c => {
+      const isEmp = c.st === 'empty';
+      row.cells.push({
+        imgIdx: isEmp ? null : getImgIdx(null),
+        status: c.st,
+        bboxW:  c.bboxW || 100,
       });
-
-      container.appendChild(rowEl);
     });
-
-    document.getElementById('infoBar').textContent =
-      `${rows.length}개 선반 · 총 ${rows.reduce((s,r)=>s+r.length,0)}개 셀 · Row 높이 ${currentRowHeight}px · 컨테이너 최대 ${currentMaxWidth}px`;
-  }
-
-  /* ─── Mock loader ─── */
-  function loadMock(key) {
-    renderRealogram(MOCKS[key]);
-  }
-
-  /* ─── Controls ─── */
-  function updateRowHeight(v) {
-    currentRowHeight = parseInt(v);
-    document.getElementById('rowHeightVal').textContent = v + 'px';
-    if (currentData) renderRealogram(currentData);
-  }
-
-  function updateMaxWidth(v) {
-    currentMaxWidth = parseInt(v) || 960;
-    if (currentData) renderRealogram(currentData);
-  }
-
-  function updateCellBg(v) {
-    currentCellBg = v;
-    if (currentData) renderRealogram(currentData);
-  }
-
-  function togglePct(v) {
-    showPct = v;
-    if (currentData) renderRealogram(currentData);
-  }
-
-  function rerenderAll() {
-    if (currentData) renderRealogram(currentData);
-  }
-
-  /* ─── File Upload ─── */
-  const dropZone = document.getElementById('dropZone');
-  dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-  dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-  dropZone.addEventListener('drop', e => {
-    e.preventDefault();
-    dropZone.classList.remove('drag-over');
-    handleFiles(e.dataTransfer.files);
+    shelfRows.push(row);
   });
 
-  function handleFiles(files) {
-    Array.from(files).forEach(file => {
-      if (!file.type.startsWith('image/')) return;
-      const reader = new FileReader();
-      reader.onload = e => {
-        uploadedImages.push({ url: e.target.result, name: file.name });
-        renderImageSlots();
-      };
-      reader.readAsDataURL(file);
-    });
-  }
+  refreshLibrary();
+  renderCanvas();
+}
 
-  function renderImageSlots() {
-    const slots = document.getElementById('imageSlots');
-    slots.innerHTML = '';
-    uploadedImages.forEach((img, i) => {
-      const slot = document.createElement('div');
-      slot.className = 'image-slot';
-      slot.innerHTML = `
-        <img src="${img.url}" alt="${img.name}">
-        <button class="remove-btn" onclick="removeImage(${i})">✕</button>
-      `;
-      slots.appendChild(slot);
-    });
-  }
-
-  function removeImage(i) {
-    uploadedImages.splice(i, 1);
-    renderImageSlots();
-  }
-
-  function renderFromUploads() {
-    if (uploadedImages.length === 0) { alert('이미지를 먼저 업로드해주세요.'); return; }
-    const perRow = parseInt(document.getElementById('cellsPerRow').value) || 4;
-
-    // 이미지를 행으로 분할
-    const rows = [];
-    for (let i = 0; i < uploadedImages.length; i += perRow) {
-      const rowImgs = uploadedImages.slice(i, i + perRow);
-      // bbox width를 알 수 없으므로 균등 분배 (실제 구현 시 API 데이터로 대체)
-      const row = rowImgs.map(img => ({
-        label: img.name,
-        bboxW: 100,  // 균등 너비 (실제 bbox 없을 때 fallback)
-        url: img.url,
-      }));
-      rows.push(row);
-    }
-    renderRealogram(rows);
-  }
-
-  /* ─── Init: 기본 mock 로드 ─── */
-  loadMock('convenience');
+/* ── Init ── */
+loadMock('oos');
 </script>
 </body>
 </html>
