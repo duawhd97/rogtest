@@ -412,7 +412,7 @@
 /* ═══════════════════════
    State
 ═══════════════════════ */
-let images   = [];    // { url, name }
+let images   = [];    // { url, name, naturalWidth }
 let shelfRows = [];   // [{ cells: [{ imgIdx|null, status:'normal'|'oos'|'misplaced'|'low'|'empty', bboxW:100 }] }]
 let rowHeightPx = 160;
 let maxWidthPx  = 960;
@@ -431,10 +431,22 @@ dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-ove
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
 
 function handleFiles(files) {
+  let pending = 0;
   Array.from(files).forEach(f => {
     if (!f.type.startsWith('image/')) return;
+    pending++;
     const r = new FileReader();
-    r.onload = e => { images.push({ url: e.target.result, name: f.name }); refreshLibrary(); };
+    r.onload = e => {
+      const url = e.target.result;
+      // Measure natural width before storing
+      const tmpImg = new Image();
+      tmpImg.onload = () => {
+        images.push({ url, name: f.name, naturalWidth: tmpImg.naturalWidth });
+        pending--;
+        refreshLibrary();
+      };
+      tmpImg.src = url;
+    };
     r.readAsDataURL(f);
   });
 }
@@ -461,7 +473,7 @@ function removeImage(i) {
   images.splice(i, 1);
   // Remap cell imgIdx references
   shelfRows.forEach(row => row.cells.forEach(c => {
-    if (c.imgIdx === i) { c.imgIdx = null; c.status = 'empty'; }
+    if (c.imgIdx === i) { c.imgIdx = null; c.status = 'empty'; c.bboxW = 100; }
     else if (c.imgIdx > i) c.imgIdx--;
   }));
   refreshLibrary();
@@ -469,7 +481,7 @@ function removeImage(i) {
 
 function clearLibrary() {
   images = [];
-  shelfRows.forEach(row => row.cells.forEach(c => { c.imgIdx = null; c.status = 'empty'; }));
+  shelfRows.forEach(row => row.cells.forEach(c => { c.imgIdx = null; c.status = 'empty'; c.bboxW = 100; }));
   document.getElementById('fileInput').value = '';
   refreshLibrary();
 }
@@ -507,7 +519,7 @@ function clearAllRows() {
 function setStatus(rowIdx, cellIdx, status) {
   const cell = shelfRows[rowIdx].cells[cellIdx];
   cell.status = status;
-  if (status === 'empty') cell.imgIdx = null;
+  if (status === 'empty') { cell.imgIdx = null; cell.bboxW = 100; }
   refreshRowList();
 }
 
@@ -520,7 +532,11 @@ function autoFill() {
     const slice = Math.min(perRow, images.length - idx);
     const row = { cells: [] };
     for (let i = 0; i < slice; i++) {
-      row.cells.push({ imgIdx: idx, status: 'normal', bboxW: 100 });
+      row.cells.push({
+        imgIdx: idx,
+        status: 'normal',
+        bboxW: images[idx].naturalWidth || 100,
+      });
       idx++;
     }
     shelfRows.push(row);
@@ -657,7 +673,14 @@ function assignImage(imgIdx) {
   if (!pickerTarget) return;
   const cell = shelfRows[pickerTarget.rowIdx].cells[pickerTarget.cellIdx];
   cell.imgIdx = imgIdx;
-  cell.status = imgIdx === null ? 'empty' : (cell.status === 'empty' ? 'normal' : cell.status);
+  if (imgIdx === null) {
+    cell.status = 'empty';
+    cell.bboxW = 100;
+  } else {
+    cell.status = cell.status === 'empty' ? 'normal' : cell.status;
+    // Use image's natural width as the relative cell width
+    cell.bboxW = images[imgIdx].naturalWidth || 100;
+  }
   refreshRowList();
 }
 
@@ -814,7 +837,8 @@ function loadMock(key) {
     ctx.font = 'bold 24px sans-serif';
     ctx.textAlign = 'center';
     ctx.fillText(`P${imgCounter+1}`, 60, 68);
-    images.push({ url: canvas.toDataURL(), name: `Product ${imgCounter+1}` });
+    // Mock images all have naturalWidth = 120 (square), bboxW comes from mockDef
+    images.push({ url: canvas.toDataURL(), name: `Product ${imgCounter+1}`, naturalWidth: 120 });
     return imgCounter++;
   };
 
