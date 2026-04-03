@@ -29,7 +29,6 @@
     .drop-zone{border:1.5px dashed #ccc;border-radius:8px;padding:14px 12px;text-align:center;font-size:12px;color:#999;cursor:pointer;transition:border-color .15s}
     .drop-zone:hover,.drop-zone.drag-over{border-color:#888;color:#555}
     .drop-zone small{display:block;font-size:10px;color:#bbb;margin-top:3px}
-    /* Image library */
     .img-library{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
     .img-card{width:84px;border:1.5px solid #e0e0e0;border-radius:8px;overflow:hidden;background:white;position:relative;transition:border-color .12s}
     .img-card .thumb{width:100%;height:60px;display:flex;align-items:center;justify-content:center;background:#f9f9f9;overflow:hidden}
@@ -38,9 +37,8 @@
     .img-card .img-wpx{font-size:8px;color:#aaa;padding:0 5px 3px;text-align:center}
     .img-card .img-idx{position:absolute;top:3px;left:4px;font-size:8px;font-weight:600;color:#fff;background:rgba(0,0,0,.4);padding:1px 4px;border-radius:3px}
     .img-card .remove-img{position:absolute;top:2px;right:3px;width:14px;height:14px;background:rgba(0,0,0,.4);border:none;border-radius:50%;color:white;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-    /* Status dot row on image card */
     .img-status-row{display:flex;gap:4px;justify-content:center;padding:3px 4px 6px}
-    .img-status-btn{width:14px;height:14px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .1s}
+    .img-status-btn{width:14px;height:14px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;transition:all .1s}
     .img-status-btn:hover{transform:scale(1.2)}
     .img-status-btn.isb-normal{background:#d0d0ce}
     .img-status-btn.isb-oos{background:#e8001e}
@@ -48,20 +46,12 @@
     .img-status-btn.isb-low{background:#f5c800}
     .img-status-btn.active{border-color:#1a1a1a;transform:scale(1.1)}
     .img-status-btn.isb-low.active{border-color:#555}
-    /* card border by status */
     .img-card.st-oos{border-color:#e8001e}
     .img-card.st-misplaced{border-color:#00b0e8}
     .img-card.st-low{border-color:#f5c800}
-    /* assign info */
-    .assign-info{margin-top:12px;font-size:10px;color:#888;background:#f9f9f7;border:0.5px solid #e8e8e4;border-radius:5px;padding:6px 10px;line-height:1.6}
-    .assign-info strong{color:#555}
-    .assign-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
-    .assign-actions-hint{font-size:10px;color:#bbb}
-    /* stats */
     .stats-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
     .stat-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:#666;background:white;border:0.5px solid #e5e5e5;padding:3px 10px;border-radius:20px}
     .stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    /* realogram */
     .realogram-outer{background:#e8e8e6;border:0.5px solid #d0d0ce;border-radius:12px;padding:16px 12px;margin-bottom:14px}
     .realogram-container{display:flex;flex-direction:column;gap:8px}
     .shelf-row-wrapper{display:flex;align-items:center;gap:8px}
@@ -74,13 +64,10 @@
     .r-cell.has-img img{width:100%;height:100%;object-fit:contain;display:block;position:absolute;inset:0}
     .r-cell.has-img .cell-id-overlay{position:absolute;bottom:3px;left:4px;background:rgba(0,0,0,.45);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;pointer-events:none;z-index:3}
     .r-cell.has-img .cell-wpx{color:rgba(255,255,255,.5)}
-    .status-badge{position:absolute;top:0;left:0;right:0;font-size:10px;font-weight:700;text-align:center;padding:3px 0;letter-spacing:.05em;z-index:2;pointer-events:none;border-radius:4px 4px 0 0}
-    .badge-oos{background:#e8001e;color:white}
-    .badge-misplaced{background:#00b0e8;color:white}
-    .badge-low{background:#f5c800;color:#333}
-    .border-oos{border:2.5px solid #e8001e!important}
-    .border-misplaced{border:2.5px solid #00b0e8!important}
-    .border-low{border:2.5px solid #f5c800!important}
+    /* ★ 텍스트 없이 border만 */
+    .border-oos{border:3px solid #e8001e!important}
+    .border-misplaced{border:3px solid #00b0e8!important}
+    .border-low{border:3px solid #f5c800!important}
     .r-cell-empty{flex-shrink:0;position:relative;overflow:hidden;border-radius:5px;background:#f2f0ec;border:1.5px dashed #c8c5bf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
     .empty-icon{width:18px;height:18px;border:1.5px dashed #bbb;border-radius:3px}
     .empty-label{font-size:8px;font-weight:700;color:#bbb;letter-spacing:.07em;text-transform:uppercase}
@@ -96,7 +83,6 @@
 <h1>Virtual ROG v6</h1>
 <p class="subtitle">cluster_bbox 기반 빈 공간 감지 &middot; 이미지에서 OOS/Misplaced/LOW 설정 &middot; Width Match 자동 매핑</p>
 
-<!-- Settings -->
 <div class="panel">
   <div class="panel-title">Display Settings</div>
   <div class="controls">
@@ -127,7 +113,6 @@
   </div>
 </div>
 
-<!-- JSON Input -->
 <div class="panel">
   <div class="panel-title">1 &middot; cluster_bbox JSON Input</div>
   <textarea class="json-input" id="jsonInput" spellcheck="false"
@@ -136,12 +121,11 @@
   <div class="input-helper">cluster_bbox: [x1, y1, x2, y2] &middot; 메모장/Notes 복붙 OK</div>
 </div>
 
-<!-- Image Library -->
 <div class="panel">
   <div class="panel-title">2 &middot; Image Library <span style="font-weight:400;color:#bbb;text-transform:none;letter-spacing:0">(optional)</span></div>
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
     Drag &amp; drop or click to upload product images
-    <small>업로드 후 각 이미지에서 Normal / OOS / Misplaced / LOW 설정</small>
+    <small>업로드 후 각 이미지 카드에서 ⚫ Normal &middot; 🔴 OOS &middot; 🔵 Misplaced &middot; 🟡 LOW 설정</small>
   </div>
   <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
   <div class="img-library" id="imgLibrary"></div>
@@ -152,7 +136,6 @@
   </div>
 </div>
 
-<!-- Render -->
 <div class="render-row">
   <button class="btn-primary" onclick="render()">Render Virtual ROG &#8595;</button>
 </div>
@@ -167,9 +150,9 @@
 <div class="legend">
   <div class="legend-item"><div class="legend-box" style="background:#b5d4f4;border:1px solid rgba(0,0,0,.1)"></div> 상품 (Normal)</div>
   <div class="legend-item"><div class="legend-box" style="background:#f2f0ec;border:1.5px dashed #c8c5bf"></div> 빈 공간 (Empty)</div>
-  <div class="legend-item"><div class="legend-box" style="background:#e8001e"></div> OOS</div>
-  <div class="legend-item"><div class="legend-box" style="background:#00b0e8"></div> Misplaced</div>
-  <div class="legend-item"><div class="legend-box" style="background:#f5c800;border:1px solid #e0b000"></div> LOW</div>
+  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #e8001e"></div> OOS</div>
+  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #00b0e8"></div> Misplaced</div>
+  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #f5c800"></div> LOW</div>
 </div>
 
 <script>
@@ -208,19 +191,16 @@ function sanitizeJSONText(raw) {
   return s.trim();
 }
 
-var images        = [];   // { url, name, naturalWidth }
-var imageStatuses = [];   // parallel: 'normal'|'oos'|'misplaced'|'low'
-var assignments   = {};   // { cluster_id: imgIdx | null }
-
+var images        = [];
+var imageStatuses = [];
+var assignments   = {};
 var PALETTE = ['#b5d4f4','#c0dd97','#f5c4b3','#fac775','#f4c0d1','#cecbf6','#aad4c8','#f5e4a0','#d3c8f4','#b8e0d2','#f9d0a0','#c8e6c9'];
 var SAMPLE  = [{"cluster_id": 1, "cluster_bbox": [30, 20, 220, 100]}, {"cluster_id": 2, "cluster_bbox": [223, 20, 390, 100]}, {"cluster_id": 3, "cluster_bbox": [393, 20, 560, 100]}, {"cluster_id": 4, "cluster_bbox": [700, 20, 880, 100]}, {"cluster_id": 5, "cluster_bbox": [883, 20, 970, 100]}, {"cluster_id": 6, "cluster_bbox": [30, 130, 170, 210]}, {"cluster_id": 7, "cluster_bbox": [173, 130, 380, 210]}, {"cluster_id": 8, "cluster_bbox": [383, 130, 530, 210]}, {"cluster_id": 9, "cluster_bbox": [700, 130, 860, 210]}, {"cluster_id": 10, "cluster_bbox": [863, 130, 970, 210]}, {"cluster_id": 11, "cluster_bbox": [30, 240, 260, 320]}, {"cluster_id": 12, "cluster_bbox": [263, 240, 430, 320]}, {"cluster_id": 13, "cluster_bbox": [560, 240, 720, 320]}, {"cluster_id": 14, "cluster_bbox": [723, 240, 870, 320]}, {"cluster_id": 15, "cluster_bbox": [873, 240, 970, 320]}, {"cluster_id": 16, "cluster_bbox": [30, 350, 200, 430]}, {"cluster_id": 17, "cluster_bbox": [203, 350, 390, 430]}, {"cluster_id": 18, "cluster_bbox": [393, 350, 560, 430]}, {"cluster_id": 19, "cluster_bbox": [700, 350, 850, 430]}, {"cluster_id": 20, "cluster_bbox": [853, 350, 970, 430]}, {"cluster_id": 21, "cluster_bbox": [30, 460, 230, 540]}, {"cluster_id": 22, "cluster_bbox": [233, 460, 420, 540]}, {"cluster_id": 23, "cluster_bbox": [423, 460, 580, 540]}, {"cluster_id": 24, "cluster_bbox": [700, 460, 840, 540]}, {"cluster_id": 25, "cluster_bbox": [843, 460, 970, 540]}, {"cluster_id": 26, "cluster_bbox": [30, 570, 180, 650]}, {"cluster_id": 27, "cluster_bbox": [183, 570, 350, 650]}, {"cluster_id": 28, "cluster_bbox": [353, 570, 530, 650]}, {"cluster_id": 29, "cluster_bbox": [533, 570, 680, 650]}, {"cluster_id": 30, "cluster_bbox": [820, 570, 970, 650]}, {"cluster_id": 31, "cluster_bbox": [30, 680, 210, 760]}, {"cluster_id": 32, "cluster_bbox": [213, 680, 360, 760]}, {"cluster_id": 33, "cluster_bbox": [500, 680, 650, 760]}, {"cluster_id": 34, "cluster_bbox": [653, 680, 800, 760]}, {"cluster_id": 35, "cluster_bbox": [803, 680, 970, 760]}, {"cluster_id": 36, "cluster_bbox": [30, 790, 200, 870]}, {"cluster_id": 37, "cluster_bbox": [203, 790, 380, 870]}, {"cluster_id": 38, "cluster_bbox": [383, 790, 540, 870]}, {"cluster_id": 39, "cluster_bbox": [700, 790, 840, 870]}, {"cluster_id": 40, "cluster_bbox": [843, 790, 970, 870]}, {"cluster_id": 41, "cluster_bbox": [30, 900, 160, 980]}, {"cluster_id": 42, "cluster_bbox": [163, 900, 300, 980]}, {"cluster_id": 43, "cluster_bbox": [303, 900, 460, 980]}, {"cluster_id": 44, "cluster_bbox": [463, 900, 610, 980]}, {"cluster_id": 45, "cluster_bbox": [750, 900, 880, 980]}, {"cluster_id": 46, "cluster_bbox": [883, 900, 970, 980]}];
 var STATUS_LABELS = {normal:'Normal', oos:'OOS', misplaced:'Misplaced', low:'LOW'};
-var STATUS_COLORS = {normal:'#d0d0ce', oos:'#e8001e', misplaced:'#00b0e8', low:'#f5c800'};
 var debounceTimer = null;
 
 document.getElementById('jsonInput').value = JSON.stringify(SAMPLE, null, 2);
 
-// ── drop zone ──
 var dz = document.getElementById('dropZone');
 dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
 dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
@@ -235,7 +215,7 @@ function handleFiles(files) {
       tmp.onload = function() {
         images.push({ url: url, name: f.name, naturalWidth: tmp.naturalWidth });
         imageStatuses.push('normal');
-        autoAssign();       // auto-assign whenever new image added
+        autoAssign();
         refreshLibrary();
       };
       tmp.src = url;
@@ -253,33 +233,21 @@ function refreshLibrary() {
   var lib = document.getElementById('imgLibrary');
   lib.innerHTML = '';
   images.forEach(function(img, i) {
-    var st  = imageStatuses[i] || 'normal';
+    var st   = imageStatuses[i] || 'normal';
     var card = document.createElement('div');
     card.className = 'img-card' + (st !== 'normal' ? ' st-' + st : '');
-
-    // thumb
     var thumb = document.createElement('div'); thumb.className = 'thumb';
     var im = document.createElement('img'); im.src = img.url; im.alt = '';
     thumb.appendChild(im); card.appendChild(thumb);
-
-    // index badge
     var idx = document.createElement('span'); idx.className = 'img-idx'; idx.textContent = i+1;
     card.appendChild(idx);
-
-    // remove
     var rm = document.createElement('button'); rm.className = 'remove-img'; rm.textContent = 'x';
     rm.onclick = (function(ii){ return function(){ removeImage(ii); }; })(i);
     card.appendChild(rm);
-
-    // name
     var nm = document.createElement('div'); nm.className = 'img-name'; nm.textContent = img.name;
     card.appendChild(nm);
-
-    // width
     var wp = document.createElement('div'); wp.className = 'img-wpx'; wp.textContent = 'W: ' + img.naturalWidth + 'px';
     card.appendChild(wp);
-
-    // status dot row
     var sRow = document.createElement('div'); sRow.className = 'img-status-row';
     ['normal','oos','misplaced','low'].forEach(function(s) {
       var btn = document.createElement('button');
@@ -289,22 +257,16 @@ function refreshLibrary() {
       sRow.appendChild(btn);
     });
     card.appendChild(sRow);
-
     lib.appendChild(card);
   });
-
   var la = document.getElementById('libActions');
   la.style.display = images.length ? 'flex' : 'none';
-
-  // update assign info
   var cl = getClusters();
   var ai = document.getElementById('assignInfo');
   if (images.length && cl.length) {
     var mapped = Object.keys(assignments).filter(function(cid){ return assignments[cid] !== null && assignments[cid] !== undefined; }).length;
     ai.textContent = 'Width match 자동 매핑 · ' + images.length + '개 이미지 → ' + mapped + '개 cluster';
-  } else {
-    ai.textContent = '';
-  }
+  } else { ai.textContent = ''; }
 }
 
 function removeImage(i) {
@@ -329,7 +291,6 @@ function clearLibrary() {
   refreshLibrary();
 }
 
-// ── parse ──
 function parseInput(raw) {
   var cleaned = sanitizeJSONText(raw);
   var data;
@@ -344,7 +305,6 @@ function parseInput(raw) {
 }
 function getClusters() { try { return parseInput(document.getElementById('jsonInput').value); } catch(e) { return []; } }
 
-// ── auto-assign: width match (runs automatically) ──
 function autoAssign() {
   if (!images.length) return;
   var cl; try { cl = parseInput(document.getElementById('jsonInput').value); } catch(e) { return; }
@@ -356,7 +316,6 @@ function autoAssign() {
   cs.forEach(function(item, i){ assignments[item.cid] = imgs[i % imgs.length].idx; });
 }
 
-// JSON change with debounce → auto-assign
 function onJsonChange() {
   clearTimeout(debounceTimer);
   debounceTimer = setTimeout(function() {
@@ -364,7 +323,6 @@ function onJsonChange() {
   }, 120);
 }
 
-// ── row grouping ──
 function groupRows(clusters) {
   var sorted = clusters.slice().sort(function(a,b){ return a.cluster_bbox[1]-b.cluster_bbox[1]; });
   var rows = [];
@@ -382,7 +340,6 @@ function groupRows(clusters) {
   return rows;
 }
 
-// ── build cells ──
 function buildCells(rows, mult, gx1, gx2) {
   return rows.map(function(row) {
     var items=row.items, cells=[];
@@ -398,34 +355,29 @@ function buildCells(rows, mult, gx1, gx2) {
   });
 }
 
-// ── render ──
 function render() {
   var errEl=document.getElementById('errorMsg'), statsEl=document.getElementById('statsBar'), cont=document.getElementById('realogramContainer');
   var rh   = parseInt(document.getElementById('rowHeight').value) || 120;
   var mw   = parseInt(document.getElementById('maxWidth').value)  || 960;
   var mult = parseFloat(document.getElementById('multiplier').value) || 0.5;
   errEl.style.display='none'; cont.innerHTML=''; statsEl.innerHTML=''; cont.style.maxWidth=mw+'px';
-
   var clusters;
   try { clusters = parseInput(document.getElementById('jsonInput').value); }
   catch(e) { errEl.textContent=e.message; errEl.style.display='block'; return; }
   if (!clusters.length) { errEl.textContent='cluster_bbox 항목이 없습니다.'; errEl.style.display='block'; return; }
-
   var gx1 = Math.min.apply(null, clusters.map(function(c){ return c.cluster_bbox[0]; }));
   var gx2 = Math.max.apply(null, clusters.map(function(c){ return c.cluster_bbox[2]; }));
   var rows = groupRows(clusters), rd = buildCells(rows, mult, gx1, gx2);
-
   var tP=0, tE=0, tOos=0, tMis=0, tLow=0, tImg=0;
   rd.forEach(function(r){ r.cells.forEach(function(c) {
     if (c.type==='product') {
       tP++;
-      var ix  = assignments[c.id];
-      var st  = (ix !== null && ix !== undefined && images[ix]) ? (imageStatuses[ix]||'normal') : 'normal';
+      var ix = assignments[c.id];
+      var st = (ix !== null && ix !== undefined && images[ix]) ? (imageStatuses[ix]||'normal') : 'normal';
       if (st==='oos') tOos++; else if (st==='misplaced') tMis++; else if (st==='low') tLow++;
       if (ix !== null && ix !== undefined && images[ix]) tImg++;
     } else tE++;
   }); });
-
   statsEl.innerHTML =
     '<div class="stat-pill"><div class="stat-dot" style="background:#aaa"></div>Rows: '+rows.length+'</div>'+
     '<div class="stat-pill"><div class="stat-dot" style="background:#b5d4f4"></div>Products: '+tP+'</div>'+
@@ -443,7 +395,6 @@ function render() {
     lbl.innerHTML = 'Row '+(ri+1)+'<span class="row-threshold">avg '+rowData.avg+'px<br>thr '+rowData.thr+'px</span>';
     wrap.appendChild(lbl);
     var rowEl = document.createElement('div'); rowEl.className='shelf-row'; rowEl.style.height=(rh+8)+'px';
-
     rowData.cells.forEach(function(cell) {
       var pct = (cell.width/totW*100).toFixed(2);
       if (cell.type === 'product') {
@@ -451,9 +402,10 @@ function render() {
         var imgObj = (ix !== null && ix !== undefined) ? images[ix] : null;
         var st     = (imgObj && imageStatuses[ix]) ? imageStatuses[ix] : 'normal';
         var el     = document.createElement('div'); el.className='r-cell'; el.style.flexBasis=pct+'%'; el.style.height=rh+'px';
-        if (st==='oos')       el.classList.add('border-oos');
+        // ★ border only, no badge text
+        if (st==='oos')            el.classList.add('border-oos');
         else if (st==='misplaced') el.classList.add('border-misplaced');
-        else if (st==='low')  el.classList.add('border-low');
+        else if (st==='low')       el.classList.add('border-low');
         if (imgObj) {
           el.classList.add('has-img');
           var im2=document.createElement('img'); im2.src=imgObj.url; im2.alt=''; el.appendChild(im2);
@@ -462,9 +414,6 @@ function render() {
           el.style.background = PALETTE[(cell.id-1)%PALETTE.length];
           var fs = Math.min(18, Math.max(9, Math.round(cell.width/14)));
           var idDiv=document.createElement('div'); idDiv.className='cell-id'; idDiv.style.fontSize=fs+'px'; idDiv.textContent='P'+cell.id; el.appendChild(idDiv);
-        }
-        if (st !== 'normal') {
-          var badge=document.createElement('div'); badge.className='status-badge badge-'+st; badge.textContent=STATUS_LABELS[st]; el.appendChild(badge);
         }
         var wpx=document.createElement('span'); wpx.className='cell-wpx'; wpx.textContent=cell.width+'px'; el.appendChild(wpx);
         rowEl.appendChild(el);
