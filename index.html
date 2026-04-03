@@ -3,864 +3,482 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual Realogram v4</title>
+  <title>Virtual ROG v6</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body {
-      font-family: 'Segoe UI', Arial, 'Noto Sans', sans-serif;
-      background: #f0f0ee;
-      padding: 24px;
-      color: #1a1a1a;
-      font-size: 13px;
-    }
-
-    h1 { font-size: 15px; font-weight: 600; margin-bottom: 3px; }
-    .subtitle { font-size: 11px; color: #999; margin-bottom: 18px; }
-
-    /* ── Panel ── */
-    .panel {
-      background: white;
-      border: 0.5px solid #ddd;
-      border-radius: 10px;
-      padding: 16px 18px;
-      margin-bottom: 14px;
-    }
-    .panel-title {
-      font-size: 11px; font-weight: 600;
-      text-transform: uppercase; letter-spacing: 0.07em;
-      color: #999; margin-bottom: 12px;
-    }
-
-    /* ── Controls ── */
-    .controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
-    .cg { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #555; }
-    input[type="range"] { width: 100px; }
-    input[type="number"] { width: 52px; padding: 3px 6px; border: 0.5px solid #ccc; border-radius: 5px; font-size: 12px; }
-    input[type="checkbox"] { cursor: pointer; }
-
-    /* ── Buttons ── */
-    button {
-      padding: 5px 12px; font-size: 12px;
-      border: 0.5px solid #ccc; border-radius: 6px;
-      background: white; cursor: pointer; transition: background 0.1s;
-    }
-    button:hover { background: #f5f5f5; }
-    button.btn-primary { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-    button.btn-primary:hover { background: #333; }
-    button.btn-sm { padding: 3px 8px; font-size: 11px; }
-    button.btn-danger { color: #c0392b; border-color: #e0b0aa; }
-    button.btn-danger:hover { background: #fff5f5; }
-
-    /* ── Drop Zone ── */
-    .drop-zone {
-      border: 1.5px dashed #ccc; border-radius: 8px;
-      padding: 16px 12px; text-align: center;
-      font-size: 12px; color: #999; cursor: pointer;
-      transition: border-color 0.15s;
-    }
-    .drop-zone:hover, .drop-zone.drag-over { border-color: #888; color: #555; }
-    .drop-zone small { display: block; font-size: 10px; color: #bbb; margin-top: 3px; }
-
-    /* ── Image Library ── */
-    .img-library {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px;
-    }
-    .img-card {
-      width: 80px;
-      border: 1.5px solid #e0e0e0; border-radius: 7px;
-      overflow: hidden; background: white;
-      cursor: pointer; transition: border-color 0.15s;
-      position: relative;
-    }
-    .img-card:hover { border-color: #aaa; }
-    .img-card.selected { border-color: #1a1a1a; }
-    .img-card .thumb {
-      width: 100%; height: 64px;
-      display: flex; align-items: center; justify-content: center;
-      background: #f9f9f9; overflow: hidden;
-    }
-    .img-card .thumb img { width: 100%; height: 100%; object-fit: contain; }
-    .img-card .img-label {
-      font-size: 9px; color: #888; padding: 3px 4px;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      text-align: center; background: white;
-    }
-    .img-card .img-idx {
-      position: absolute; top: 3px; left: 4px;
-      font-size: 8px; font-weight: 600; color: #fff;
-      background: rgba(0,0,0,0.4); padding: 1px 4px; border-radius: 3px;
-    }
-    .img-card .remove-img {
-      position: absolute; top: 2px; right: 3px;
-      width: 14px; height: 14px;
-      background: rgba(0,0,0,0.4); border: none; border-radius: 50%;
-      color: white; font-size: 9px; cursor: pointer;
-      display: flex; align-items: center; justify-content: center; padding: 0;
-    }
-
-    /* ── Row Builder ── */
-    .row-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
-    .row-item {
-      border: 0.5px solid #e5e5e5; border-radius: 8px;
-      padding: 8px 10px; background: #fafafa;
-    }
-    .row-item-header {
-      display: flex; align-items: center; gap: 8px;
-      margin-bottom: 8px;
-    }
-    .row-item-header .row-label { font-size: 11px; color: #666; font-weight: 500; }
-    .row-item-header .row-actions { margin-left: auto; display: flex; gap: 6px; }
-
-    .cell-slots { display: flex; flex-wrap: wrap; gap: 6px; }
-    .cell-slot {
-      width: 90px; border: 1px solid #e0e0e0; border-radius: 6px;
-      background: white; overflow: hidden;
-      font-size: 10px;
-    }
-    .cell-slot .slot-thumb {
-      width: 100%; height: 56px;
-      display: flex; align-items: center; justify-content: center;
-      background: #f5f5f5; overflow: hidden; position: relative; cursor: pointer;
-    }
-    .cell-slot .slot-thumb img { width: 100%; height: 100%; object-fit: contain; }
-    .cell-slot .slot-thumb.is-empty {
-      background: #f0ede8;
-      flex-direction: column; gap: 3px;
-    }
-    .slot-empty-icon {
-      width: 18px; height: 18px;
-      border: 1.5px dashed #ccc; border-radius: 3px;
-    }
-    .slot-empty-text { font-size: 8px; color: #bbb; text-transform: uppercase; letter-spacing: 0.04em; }
-    .cell-slot .slot-thumb .assign-hint {
-      position: absolute; inset: 0;
-      background: rgba(0,0,0,0.35); color: white;
-      font-size: 9px; display: none;
-      align-items: center; justify-content: center; text-align: center;
-      padding: 4px;
-    }
-    .cell-slot .slot-thumb:hover .assign-hint { display: flex; }
-
-    .cell-slot .slot-controls {
-      padding: 4px 4px 5px;
-      display: flex; flex-direction: column; gap: 3px;
-    }
-    .slot-status-row { display: flex; gap: 4px; align-items: center; }
-    .status-btn {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid transparent;
-      cursor: pointer; transition: all 0.12s;
-      flex-shrink: 0; padding: 0; background: #d0d0ce;
-      position: relative;
-    }
-    .status-btn:hover { transform: scale(1.18); }
-    .status-btn.sb-normal    { background: #d0d0ce; }
-    .status-btn.sb-oos       { background: #e8001e; }
-    .status-btn.sb-misplaced { background: #00b0e8; }
-    .status-btn.sb-low       { background: #f5c800; }
-    .status-btn.active { border-color: #1a1a1a; box-shadow: 0 0 0 1px #fff inset; transform: scale(1.15); }
-    .status-btn .sb-check {
-      display: none; position: absolute; inset: 0;
-      align-items: center; justify-content: center;
-      font-size: 9px; color: white; font-weight: 700; pointer-events: none;
-    }
-    .status-btn.sb-low .sb-check { color: #555; }
-    .status-btn.active .sb-check { display: flex; }
-
-    .slot-bottom-row { display: flex; gap: 3px; }
-    .slot-img-selector {
-      flex: 1; font-size: 9px; padding: 2px 3px;
-      border: 0.5px solid #ddd; border-radius: 3px; background: white;
-      cursor: pointer;
-    }
-    .slot-remove {
-      font-size: 9px; padding: 2px 5px;
-      border: 0.5px solid #e0b0aa; border-radius: 3px;
-      background: white; color: #c0392b; cursor: pointer;
-    }
-    .slot-remove:hover { background: #fff5f5; }
-
-    /* ── Realogram Canvas ── */
-    .realogram-outer {
-      border: 0.5px solid #d0d0ce;
-      border-radius: 12px; padding: 12px;
-      margin-bottom: 14px;
-    }
-    .realogram-container { width: 100%; display: flex; flex-direction: column; gap: 8px; }
-
-    /* Shelf row = rounded box with inner padding, like a physical shelf */
-    .shelf-row {
-      display: flex; width: 100%;
-      /* background: white;
-      border: 1.5px solid #d0d0ce; */
-      border-radius: 8px;
-      overflow: hidden;
-      padding: 4px;
-      gap: 4px;
-    }
-
-    /* Each cell is a separate rounded white box */
-    .r-cell {
-      flex-shrink: 0;
-      height: 100%;
-      position: relative; overflow: hidden;
-      border-radius: 5px;
-      display: flex; align-items: center; justify-content: center;
-      border: 1px solid #e0e0de;
-      background: white;
-    }
-
-    /* Normal */
-    .r-cell.st-normal { background: white; }
-    .r-cell.st-normal:hover { background: #fafafa; }
-
-    /* Empty */
-    .r-cell.st-empty { background: #f2f0ec; border: 1px dashed #c8c5bf; }
-    .empty-inner2 {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 5px;
-    }
-    .empty-box {
-      width: 22px; height: 22px;
-      border: 1.5px dashed #ccc; border-radius: 4px;
-    }
-
-    /* Cell image */
-    .r-cell img {
-      width: 100%; height: 100%; object-fit: contain; display: block;
-    }
-
-    /* Status badge overlay — top bar */
-    .status-badge {
-      position: absolute; top: 0; left: 0; right: 0;
-      font-size: 10px; font-weight: 700;
-      text-align: center; padding: 3px 0;
-      letter-spacing: 0.05em; z-index: 2;
-      pointer-events: none;
-      border-radius: 4px 4px 0 0;
-    }
-    .badge-oos       { background: #e8001e; color: white; }
-    .badge-misplaced { background: #00b0e8; color: white; }
-    .badge-low       { background: #f5c800; color: #333; }
-
-    /* Status border — replaces outline so it works with border-radius */
-    .border-oos       { border: 2.5px solid #e8001e !important; }
-    .border-misplaced { border: 2.5px solid #00b0e8 !important; }
-    .border-low       { border: 2.5px solid #f5c800 !important; }
-
-    /* % label */
-    .cell-pct { position: absolute; bottom: 2px; right: 3px; font-size: 8px; color: #ccc; pointer-events: none; }
-
-    /* ── Stats ── */
-    .stats-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
-    .stat-pill {
-      display: flex; align-items: center; gap: 5px;
-      font-size: 11px; color: #666;
-      background: white; border: 0.5px solid #e5e5e5;
-      padding: 3px 10px; border-radius: 20px;
-    }
-    .stat-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-    /* ── Scenario tabs ── */
-    .tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
-    .tab {
-      padding: 5px 13px; font-size: 12px;
-      border: 0.5px solid #ccc; border-radius: 20px;
-      background: white; cursor: pointer;
-    }
-    .tab:hover { border-color: #888; }
-    .tab.active { background: #1a1a1a; color: white; border-color: #1a1a1a; }
-
-    .divider { border: none; border-top: 0.5px solid #eee; margin: 12px 0; }
-
-    .add-row-bar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-top: 10px; }
-
-    /* Selecting image for slot */
-    .img-picker-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,0.5); z-index: 100;
-      align-items: center; justify-content: center;
-    }
-    .img-picker-overlay.open { display: flex; }
-    .img-picker-box {
-      background: white; border-radius: 12px;
-      padding: 20px; width: 420px; max-width: 95vw;
-      max-height: 80vh; overflow-y: auto;
-    }
-    .img-picker-box h3 { font-size: 14px; font-weight: 500; margin-bottom: 12px; }
-    .picker-grid { display: flex; flex-wrap: wrap; gap: 8px; }
-    .picker-item {
-      width: 72px; border: 1.5px solid #e0e0e0; border-radius: 7px;
-      overflow: hidden; cursor: pointer; transition: border-color 0.1s;
-    }
-    .picker-item:hover { border-color: #1a1a1a; }
-    .picker-item img { width: 100%; height: 60px; object-fit: contain; background: #f9f9f9; display: block; }
-    .picker-item .picker-label { font-size: 8px; color: #888; padding: 2px 4px; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .picker-empty-btn {
-      width: 72px; height: 78px; border: 1.5px dashed #ccc;
-      border-radius: 7px; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; gap: 4px;
-      cursor: pointer; font-size: 9px; color: #aaa;
-      background: #f8f8f8;
-    }
-    .picker-empty-btn:hover { border-color: #888; color: #555; }
-    .picker-close { margin-top: 12px; width: 100%; }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f0ee;padding:24px;color:#1a1a1a;font-size:13px}
+    h1{font-size:15px;font-weight:600;margin-bottom:3px}
+    .subtitle{font-size:11px;color:#999;margin-bottom:14px}
+    .panel{background:white;border:0.5px solid #ddd;border-radius:10px;padding:16px 18px;margin-bottom:14px}
+    .panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:12px}
+    .controls{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
+    .cg{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#555}
+    .cg-row{display:flex;align-items:center;gap:7px}
+    .cg-hint{font-size:10px;color:#bbb;margin-top:1px}
+    input[type=range]{width:120px;cursor:pointer}
+    input[type=number]{width:58px;padding:3px 6px;border:0.5px solid #ccc;border-radius:5px;font-size:12px}
+    button{padding:5px 12px;font-size:12px;border:0.5px solid #ccc;border-radius:6px;background:white;cursor:pointer;transition:background .1s}
+    button:hover{background:#f5f5f5}
+    .btn-primary{background:#1a1a1a!important;color:white!important;border-color:#1a1a1a!important;padding:8px 22px!important;font-size:13px!important}
+    .btn-sm{padding:3px 8px!important;font-size:11px!important}
+    .btn-danger{color:#c0392b!important;border-color:#e0b0aa!important}
+    .btn-danger:hover{background:#fff5f5!important}
+    .json-input{width:100%;height:160px;font-family:'Courier New',monospace;font-size:11px;border:0.5px solid #ddd;border-radius:7px;padding:10px 12px;resize:vertical;color:#333;background:#fafafa;line-height:1.5}
+    .json-input:focus{outline:none;border-color:#aaa;background:white}
+    .input-helper{font-size:10px;color:#bbb;margin-top:5px}
+    .drop-zone{border:1.5px dashed #ccc;border-radius:8px;padding:14px 12px;text-align:center;font-size:12px;color:#999;cursor:pointer;transition:border-color .15s}
+    .drop-zone:hover,.drop-zone.drag-over{border-color:#888;color:#555}
+    .drop-zone small{display:block;font-size:10px;color:#bbb;margin-top:3px}
+    /* Image library */
+    .img-library{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    .img-card{width:84px;border:1.5px solid #e0e0e0;border-radius:8px;overflow:hidden;background:white;position:relative;transition:border-color .12s}
+    .img-card .thumb{width:100%;height:60px;display:flex;align-items:center;justify-content:center;background:#f9f9f9;overflow:hidden}
+    .img-card .thumb img{width:100%;height:100%;object-fit:contain}
+    .img-card .img-name{font-size:9px;color:#888;padding:3px 5px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
+    .img-card .img-wpx{font-size:8px;color:#aaa;padding:0 5px 3px;text-align:center}
+    .img-card .img-idx{position:absolute;top:3px;left:4px;font-size:8px;font-weight:600;color:#fff;background:rgba(0,0,0,.4);padding:1px 4px;border-radius:3px}
+    .img-card .remove-img{position:absolute;top:2px;right:3px;width:14px;height:14px;background:rgba(0,0,0,.4);border:none;border-radius:50%;color:white;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
+    /* Status dot row on image card */
+    .img-status-row{display:flex;gap:4px;justify-content:center;padding:3px 4px 6px}
+    .img-status-btn{width:14px;height:14px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .1s}
+    .img-status-btn:hover{transform:scale(1.2)}
+    .img-status-btn.isb-normal{background:#d0d0ce}
+    .img-status-btn.isb-oos{background:#e8001e}
+    .img-status-btn.isb-misplaced{background:#00b0e8}
+    .img-status-btn.isb-low{background:#f5c800}
+    .img-status-btn.active{border-color:#1a1a1a;transform:scale(1.1)}
+    .img-status-btn.isb-low.active{border-color:#555}
+    /* card border by status */
+    .img-card.st-oos{border-color:#e8001e}
+    .img-card.st-misplaced{border-color:#00b0e8}
+    .img-card.st-low{border-color:#f5c800}
+    /* assign info */
+    .assign-info{margin-top:12px;font-size:10px;color:#888;background:#f9f9f7;border:0.5px solid #e8e8e4;border-radius:5px;padding:6px 10px;line-height:1.6}
+    .assign-info strong{color:#555}
+    .assign-actions{display:flex;gap:8px;margin-top:10px;align-items:center;flex-wrap:wrap}
+    .assign-actions-hint{font-size:10px;color:#bbb}
+    /* stats */
+    .stats-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+    .stat-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:#666;background:white;border:0.5px solid #e5e5e5;padding:3px 10px;border-radius:20px}
+    .stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+    /* realogram */
+    .realogram-outer{background:#e8e8e6;border:0.5px solid #d0d0ce;border-radius:12px;padding:16px 12px;margin-bottom:14px}
+    .realogram-container{display:flex;flex-direction:column;gap:8px}
+    .shelf-row-wrapper{display:flex;align-items:center;gap:8px}
+    .row-label{width:48px;font-size:10px;color:#aaa;text-align:right;flex-shrink:0;line-height:1.5}
+    .row-threshold{font-size:8px;color:#ccc;display:block;margin-top:1px}
+    .shelf-row{flex:1;display:flex;background:white;border:1.5px solid #d0d0ce;border-radius:8px;overflow:hidden;padding:4px;gap:4px}
+    .r-cell{flex-shrink:0;position:relative;overflow:hidden;border-radius:5px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,.08);background:white}
+    .r-cell .cell-id{font-weight:700;color:rgba(0,0,0,.55);pointer-events:none;text-align:center;line-height:1.2}
+    .r-cell .cell-wpx{position:absolute;bottom:3px;right:4px;font-size:8px;color:rgba(0,0,0,.3);pointer-events:none;z-index:3}
+    .r-cell.has-img img{width:100%;height:100%;object-fit:contain;display:block;position:absolute;inset:0}
+    .r-cell.has-img .cell-id-overlay{position:absolute;bottom:3px;left:4px;background:rgba(0,0,0,.45);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;pointer-events:none;z-index:3}
+    .r-cell.has-img .cell-wpx{color:rgba(255,255,255,.5)}
+    .status-badge{position:absolute;top:0;left:0;right:0;font-size:10px;font-weight:700;text-align:center;padding:3px 0;letter-spacing:.05em;z-index:2;pointer-events:none;border-radius:4px 4px 0 0}
+    .badge-oos{background:#e8001e;color:white}
+    .badge-misplaced{background:#00b0e8;color:white}
+    .badge-low{background:#f5c800;color:#333}
+    .border-oos{border:2.5px solid #e8001e!important}
+    .border-misplaced{border:2.5px solid #00b0e8!important}
+    .border-low{border:2.5px solid #f5c800!important}
+    .r-cell-empty{flex-shrink:0;position:relative;overflow:hidden;border-radius:5px;background:#f2f0ec;border:1.5px dashed #c8c5bf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+    .empty-icon{width:18px;height:18px;border:1.5px dashed #bbb;border-radius:3px}
+    .empty-label{font-size:8px;font-weight:700;color:#bbb;letter-spacing:.07em;text-transform:uppercase}
+    .empty-wpx{position:absolute;bottom:3px;right:4px;font-size:8px;color:#ccc}
+    .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#888;padding:10px 14px;background:white;border:0.5px solid #e5e5e5;border-radius:8px;margin-bottom:6px}
+    .legend-item{display:flex;align-items:center;gap:5px}
+    .legend-box{width:13px;height:13px;border-radius:3px}
+    .error-msg{background:#fff5f5;border:0.5px solid #f5c0bb;border-radius:7px;padding:10px 14px;font-size:12px;color:#c0392b;margin-bottom:12px;display:none;white-space:pre-line}
+    .render-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
   </style>
 </head>
 <body>
+<h1>Virtual ROG v6</h1>
+<p class="subtitle">cluster_bbox 기반 빈 공간 감지 &middot; 이미지에서 OOS/Misplaced/LOW 설정 &middot; Width Match 자동 매핑</p>
 
-<h1>Virtual Realogram v4</h1>
-<p class="subtitle">Upload product images · assign status per cell · mix with empty slots</p>
-
-<!-- ══════════════════════════════
-     SECTION 1: Controls
-══════════════════════════════ -->
+<!-- Settings -->
 <div class="panel">
   <div class="panel-title">Display Settings</div>
   <div class="controls">
     <div class="cg">
-      <label>Row height</label>
-      <input type="range" id="rowHeight" min="80" max="260" value="160" oninput="onRowHeight(this.value)">
-      <span id="rowHeightVal">160px</span>
+      <div class="cg-row">
+        <label>Gap sensitivity</label>
+        <input type="range" id="multiplier" min="0.3" max="1.0" value="0.5" step="0.05"
+          oninput="document.getElementById('mVal').textContent='x'+parseFloat(this.value).toFixed(2);render()">
+        <span id="mVal">x0.50</span>
+      </div>
+      <div class="cg-hint">빈 공간 감지 = 층 평균 width x 배율</div>
     </div>
     <div class="cg">
-      <label>Max width</label>
-      <input type="number" id="maxWidth" value="960" min="400" max="1600" step="10" oninput="onMaxWidth(this.value)">
-      <span>px</span>
+      <div class="cg-row">
+        <label>Row height</label>
+        <input type="range" id="rowHeight" min="60" max="200" value="120"
+          oninput="document.getElementById('rhVal').textContent=this.value+'px';render()">
+        <span id="rhVal">120px</span>
+      </div>
     </div>
     <div class="cg">
-      <label>Show %</label>
-      <input type="checkbox" id="showPct" checked onchange="renderCanvas()">
+      <div class="cg-row">
+        <label>Max width</label>
+        <input type="number" id="maxWidth" value="960" min="400" max="1600" step="10" oninput="render()">
+        <span>px</span>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SECTION 2: Image Library
-══════════════════════════════ -->
+<!-- JSON Input -->
 <div class="panel">
-  <div class="panel-title">1 · Image Library</div>
+  <div class="panel-title">1 &middot; cluster_bbox JSON Input</div>
+  <textarea class="json-input" id="jsonInput" spellcheck="false"
+    oninput="onJsonChange()"
+    placeholder="JSON을 붙여넣으세요. 코드블록(```json)이나 설명 텍스트가 있어도 자동 처리됩니다."></textarea>
+  <div class="input-helper">cluster_bbox: [x1, y1, x2, y2] &middot; 메모장/Notes 복붙 OK</div>
+</div>
+
+<!-- Image Library -->
+<div class="panel">
+  <div class="panel-title">2 &middot; Image Library <span style="font-weight:400;color:#bbb;text-transform:none;letter-spacing:0">(optional)</span></div>
   <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-    Drag & drop or click to upload product images
-    <small>Multiple files supported</small>
+    Drag &amp; drop or click to upload product images
+    <small>업로드 후 각 이미지에서 Normal / OOS / Misplaced / LOW 설정</small>
   </div>
   <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
   <div class="img-library" id="imgLibrary"></div>
-  <div id="libraryActions" style="margin-top:10px;display:none;gap:8px">
+  <div id="libActions" style="display:none;margin-top:10px;gap:8px;align-items:center">
+    <button class="btn-sm" onclick="autoAssign()">&#9889; Re-assign (width match)</button>
     <button class="btn-sm btn-danger" onclick="clearLibrary()">Clear all</button>
+    <span id="assignInfo" style="font-size:10px;color:#aaa"></span>
   </div>
 </div>
 
-<!-- ══════════════════════════════
-     SECTION 3: Shelf Layout Builder
-══════════════════════════════ -->
-<div class="panel">
-  <div class="panel-title">2 · Shelf Layout Builder</div>
-
-  <div class="add-row-bar">
-    <div class="cg">
-      <label>Cells in new row</label>
-      <input type="number" id="newRowCells" value="5" min="1" max="16" style="width:48px">
-    </div>
-    <button onclick="addRow()">+ Add shelf row</button>
-    <button onclick="autoFill()">Auto-fill from library</button>
-    <button class="btn-danger btn-sm" onclick="clearAllRows()" style="margin-left:auto">Clear all rows</button>
-  </div>
-
-  <div class="row-list" id="rowList">
-    <div style="font-size:11px;color:#bbb;padding:8px 0;text-align:center">
-      Add shelf rows above, then assign images and statuses to each cell.
-    </div>
-  </div>
+<!-- Render -->
+<div class="render-row">
+  <button class="btn-primary" onclick="render()">Render Virtual ROG &#8595;</button>
 </div>
 
-<!-- ══════════════════════════════
-     Render Button
-══════════════════════════════ -->
-<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
-  <button class="btn-primary" onclick="renderCanvas()" style="padding:8px 20px;font-size:13px">
-    Render Realogram ↓
-  </button>
-  <div class="tabs" style="margin-bottom:0">
-    <span style="font-size:11px;color:#aaa;align-self:center">Mock:</span>
-    <button class="tab" onclick="loadMock('noEmpty')"  id="tab-noEmpty">No empty</button>
-    <button class="tab"        onclick="loadMock('mixed')"    id="tab-mixed">Mixed empty</button>
-    <button class="tab"        onclick="loadMock('oos')"      id="tab-oos">OOS + Misplaced</button>
-  </div>
-</div>
-
-<!-- ══════════════════════════════
-     REALOGRAM CANVAS
-══════════════════════════════ -->
+<div class="error-msg" id="errorMsg"></div>
 <div class="stats-bar" id="statsBar"></div>
+
 <div class="realogram-outer">
   <div class="realogram-container" id="realogramContainer"></div>
 </div>
 
-<!-- ══════════════════════════════
-     Image Picker Modal
-══════════════════════════════ -->
-<div class="img-picker-overlay" id="pickerOverlay">
-  <div class="img-picker-box">
-    <h3>Select image for this cell</h3>
-    <div class="picker-grid" id="pickerGrid"></div>
-    <button class="picker-close btn-sm" onclick="closePicker()">Cancel</button>
-  </div>
+<div class="legend">
+  <div class="legend-item"><div class="legend-box" style="background:#b5d4f4;border:1px solid rgba(0,0,0,.1)"></div> 상품 (Normal)</div>
+  <div class="legend-item"><div class="legend-box" style="background:#f2f0ec;border:1.5px dashed #c8c5bf"></div> 빈 공간 (Empty)</div>
+  <div class="legend-item"><div class="legend-box" style="background:#e8001e"></div> OOS</div>
+  <div class="legend-item"><div class="legend-box" style="background:#00b0e8"></div> Misplaced</div>
+  <div class="legend-item"><div class="legend-box" style="background:#f5c800;border:1px solid #e0b000"></div> LOW</div>
 </div>
 
 <script>
-/* ═══════════════════════
-   State
-═══════════════════════ */
-let images   = [];    // { url, name, naturalWidth }
-let shelfRows = [];   // [{ cells: [{ imgIdx|null, status:'normal'|'oos'|'misplaced'|'low'|'empty', bboxW:100 }] }]
-let rowHeightPx = 160;
-let maxWidthPx  = 960;
-let pickerTarget = null;  // { rowIdx, cellIdx }
+function sanitizeJSONText(raw) {
+  var s = raw || '';
+  var out = '';
+  for (var i = 0; i < s.length; i++) {
+    var code = s.charCodeAt(i);
+    if (code === 65279) continue;
+    if (code >= 8203 && code <= 8205) continue;
+    if (code === 8288) continue;
+    if (code === 160) { out += ' '; continue; }
+    if (code === 8220 || code === 8221) { out += '"'; continue; }
+    if (code === 8216 || code === 8217) { out += "'"; continue; }
+    out += s[i];
+  }
+  s = out;
+  var lines = s.split(/\r?\n/);
+  var kept = [];
+  for (var i = 0; i < lines.length; i++) {
+    var t = lines[i].trim();
+    if (/^`{3}[a-zA-Z]*$/.test(t)) continue;
+    if (/^[=\-]{3,}/.test(t)) continue;
+    if (/^[a-zA-Z]+$/.test(t)) continue;
+    kept.push(lines[i]);
+  }
+  s = kept.join('\n');
+  var fa = s.indexOf('['), fo = s.indexOf('{'), start = -1;
+  if (fa !== -1 && fo !== -1) start = Math.min(fa, fo);
+  else start = (fa !== -1) ? fa : fo;
+  if (start > 0) s = s.slice(start);
+  var la = s.lastIndexOf(']'), lo = s.lastIndexOf('}');
+  var end = Math.max(la, lo);
+  if (end !== -1) s = s.slice(0, end + 1);
+  s = s.replace(/,(\s*[}\]])/g, '$1');
+  return s.trim();
+}
 
-const STATUS_LIST = ['normal','oos','misplaced','low'];
-const STATUS_LABELS = { normal:'Normal', oos:'OOS', misplaced:'Misplaced', low:'LOW' };
-const STATUS_COLORS = { oos:'#e8001e', misplaced:'#00b0e8', low:'#f5c800', normal:'#e0e0e0' };
+var images        = [];   // { url, name, naturalWidth }
+var imageStatuses = [];   // parallel: 'normal'|'oos'|'misplaced'|'low'
+var assignments   = {};   // { cluster_id: imgIdx | null }
 
-/* ═══════════════════════
-   Image Library
-═══════════════════════ */
-const dropZone = document.getElementById('dropZone');
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+var PALETTE = ['#b5d4f4','#c0dd97','#f5c4b3','#fac775','#f4c0d1','#cecbf6','#aad4c8','#f5e4a0','#d3c8f4','#b8e0d2','#f9d0a0','#c8e6c9'];
+var SAMPLE  = [{"cluster_id": 1, "cluster_bbox": [30, 20, 220, 100]}, {"cluster_id": 2, "cluster_bbox": [223, 20, 390, 100]}, {"cluster_id": 3, "cluster_bbox": [393, 20, 560, 100]}, {"cluster_id": 4, "cluster_bbox": [700, 20, 880, 100]}, {"cluster_id": 5, "cluster_bbox": [883, 20, 970, 100]}, {"cluster_id": 6, "cluster_bbox": [30, 130, 170, 210]}, {"cluster_id": 7, "cluster_bbox": [173, 130, 380, 210]}, {"cluster_id": 8, "cluster_bbox": [383, 130, 530, 210]}, {"cluster_id": 9, "cluster_bbox": [700, 130, 860, 210]}, {"cluster_id": 10, "cluster_bbox": [863, 130, 970, 210]}, {"cluster_id": 11, "cluster_bbox": [30, 240, 260, 320]}, {"cluster_id": 12, "cluster_bbox": [263, 240, 430, 320]}, {"cluster_id": 13, "cluster_bbox": [560, 240, 720, 320]}, {"cluster_id": 14, "cluster_bbox": [723, 240, 870, 320]}, {"cluster_id": 15, "cluster_bbox": [873, 240, 970, 320]}, {"cluster_id": 16, "cluster_bbox": [30, 350, 200, 430]}, {"cluster_id": 17, "cluster_bbox": [203, 350, 390, 430]}, {"cluster_id": 18, "cluster_bbox": [393, 350, 560, 430]}, {"cluster_id": 19, "cluster_bbox": [700, 350, 850, 430]}, {"cluster_id": 20, "cluster_bbox": [853, 350, 970, 430]}, {"cluster_id": 21, "cluster_bbox": [30, 460, 230, 540]}, {"cluster_id": 22, "cluster_bbox": [233, 460, 420, 540]}, {"cluster_id": 23, "cluster_bbox": [423, 460, 580, 540]}, {"cluster_id": 24, "cluster_bbox": [700, 460, 840, 540]}, {"cluster_id": 25, "cluster_bbox": [843, 460, 970, 540]}, {"cluster_id": 26, "cluster_bbox": [30, 570, 180, 650]}, {"cluster_id": 27, "cluster_bbox": [183, 570, 350, 650]}, {"cluster_id": 28, "cluster_bbox": [353, 570, 530, 650]}, {"cluster_id": 29, "cluster_bbox": [533, 570, 680, 650]}, {"cluster_id": 30, "cluster_bbox": [820, 570, 970, 650]}, {"cluster_id": 31, "cluster_bbox": [30, 680, 210, 760]}, {"cluster_id": 32, "cluster_bbox": [213, 680, 360, 760]}, {"cluster_id": 33, "cluster_bbox": [500, 680, 650, 760]}, {"cluster_id": 34, "cluster_bbox": [653, 680, 800, 760]}, {"cluster_id": 35, "cluster_bbox": [803, 680, 970, 760]}, {"cluster_id": 36, "cluster_bbox": [30, 790, 200, 870]}, {"cluster_id": 37, "cluster_bbox": [203, 790, 380, 870]}, {"cluster_id": 38, "cluster_bbox": [383, 790, 540, 870]}, {"cluster_id": 39, "cluster_bbox": [700, 790, 840, 870]}, {"cluster_id": 40, "cluster_bbox": [843, 790, 970, 870]}, {"cluster_id": 41, "cluster_bbox": [30, 900, 160, 980]}, {"cluster_id": 42, "cluster_bbox": [163, 900, 300, 980]}, {"cluster_id": 43, "cluster_bbox": [303, 900, 460, 980]}, {"cluster_id": 44, "cluster_bbox": [463, 900, 610, 980]}, {"cluster_id": 45, "cluster_bbox": [750, 900, 880, 980]}, {"cluster_id": 46, "cluster_bbox": [883, 900, 970, 980]}];
+var STATUS_LABELS = {normal:'Normal', oos:'OOS', misplaced:'Misplaced', low:'LOW'};
+var STATUS_COLORS = {normal:'#d0d0ce', oos:'#e8001e', misplaced:'#00b0e8', low:'#f5c800'};
+var debounceTimer = null;
+
+document.getElementById('jsonInput').value = JSON.stringify(SAMPLE, null, 2);
+
+// ── drop zone ──
+var dz = document.getElementById('dropZone');
+dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
+dz.addEventListener('drop',      function(e){ e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
 
 function handleFiles(files) {
-  let pending = 0;
-  Array.from(files).forEach(f => {
+  Array.from(files).forEach(function(f) {
     if (!f.type.startsWith('image/')) return;
-    pending++;
-    const r = new FileReader();
-    r.onload = e => {
-      const url = e.target.result;
-      // Measure natural width before storing
-      const tmpImg = new Image();
-      tmpImg.onload = () => {
-        images.push({ url, name: f.name, naturalWidth: tmpImg.naturalWidth });
-        pending--;
+    var r = new FileReader();
+    r.onload = function(ev) {
+      var url = ev.target.result, tmp = new Image();
+      tmp.onload = function() {
+        images.push({ url: url, name: f.name, naturalWidth: tmp.naturalWidth });
+        imageStatuses.push('normal');
+        autoAssign();       // auto-assign whenever new image added
         refreshLibrary();
       };
-      tmpImg.src = url;
+      tmp.src = url;
     };
     r.readAsDataURL(f);
   });
 }
 
+function setImageStatus(imgIdx, status) {
+  imageStatuses[imgIdx] = status;
+  refreshLibrary();
+}
+
 function refreshLibrary() {
-  const lib = document.getElementById('imgLibrary');
+  var lib = document.getElementById('imgLibrary');
   lib.innerHTML = '';
-  images.forEach((img, i) => {
-    const card = document.createElement('div');
-    card.className = 'img-card';
-    card.innerHTML = `
-      <span class="img-idx">${i+1}</span>
-      <div class="thumb"><img src="${img.url}" alt=""></div>
-      <div class="img-label">${img.name}</div>
-      <button class="remove-img" onclick="removeImage(${i})">✕</button>
-    `;
+  images.forEach(function(img, i) {
+    var st  = imageStatuses[i] || 'normal';
+    var card = document.createElement('div');
+    card.className = 'img-card' + (st !== 'normal' ? ' st-' + st : '');
+
+    // thumb
+    var thumb = document.createElement('div'); thumb.className = 'thumb';
+    var im = document.createElement('img'); im.src = img.url; im.alt = '';
+    thumb.appendChild(im); card.appendChild(thumb);
+
+    // index badge
+    var idx = document.createElement('span'); idx.className = 'img-idx'; idx.textContent = i+1;
+    card.appendChild(idx);
+
+    // remove
+    var rm = document.createElement('button'); rm.className = 'remove-img'; rm.textContent = 'x';
+    rm.onclick = (function(ii){ return function(){ removeImage(ii); }; })(i);
+    card.appendChild(rm);
+
+    // name
+    var nm = document.createElement('div'); nm.className = 'img-name'; nm.textContent = img.name;
+    card.appendChild(nm);
+
+    // width
+    var wp = document.createElement('div'); wp.className = 'img-wpx'; wp.textContent = 'W: ' + img.naturalWidth + 'px';
+    card.appendChild(wp);
+
+    // status dot row
+    var sRow = document.createElement('div'); sRow.className = 'img-status-row';
+    ['normal','oos','misplaced','low'].forEach(function(s) {
+      var btn = document.createElement('button');
+      btn.className = 'img-status-btn isb-' + s + (st === s ? ' active' : '');
+      btn.title = STATUS_LABELS[s];
+      btn.onclick = (function(ii, ss){ return function(){ setImageStatus(ii, ss); }; })(i, s);
+      sRow.appendChild(btn);
+    });
+    card.appendChild(sRow);
+
     lib.appendChild(card);
   });
-  document.getElementById('libraryActions').style.display = images.length ? 'flex' : 'none';
-  refreshRowList();
+
+  var la = document.getElementById('libActions');
+  la.style.display = images.length ? 'flex' : 'none';
+
+  // update assign info
+  var cl = getClusters();
+  var ai = document.getElementById('assignInfo');
+  if (images.length && cl.length) {
+    var mapped = Object.keys(assignments).filter(function(cid){ return assignments[cid] !== null && assignments[cid] !== undefined; }).length;
+    ai.textContent = 'Width match 자동 매핑 · ' + images.length + '개 이미지 → ' + mapped + '개 cluster';
+  } else {
+    ai.textContent = '';
+  }
 }
 
 function removeImage(i) {
   images.splice(i, 1);
-  // Remap cell imgIdx references
-  shelfRows.forEach(row => row.cells.forEach(c => {
-    if (c.imgIdx === i) { c.imgIdx = null; c.status = 'empty'; c.bboxW = 100; }
-    else if (c.imgIdx > i) c.imgIdx--;
-  }));
+  imageStatuses.splice(i, 1);
+  var na = {};
+  Object.keys(assignments).forEach(function(cid) {
+    var v = assignments[cid];
+    if (v === null || v === undefined) na[cid] = null;
+    else if (v === i)  na[cid] = null;
+    else if (v > i)    na[cid] = v - 1;
+    else               na[cid] = v;
+  });
+  assignments = na;
+  autoAssign();
   refreshLibrary();
 }
 
 function clearLibrary() {
-  images = [];
-  shelfRows.forEach(row => row.cells.forEach(c => { c.imgIdx = null; c.status = 'empty'; c.bboxW = 100; }));
+  images = []; imageStatuses = []; assignments = {};
   document.getElementById('fileInput').value = '';
   refreshLibrary();
 }
 
-/* ═══════════════════════
-   Row Builder
-═══════════════════════ */
-function addRow(cells) {
-  const n = cells !== undefined ? cells : parseInt(document.getElementById('newRowCells').value) || 5;
-  shelfRows.push({ cells: Array.from({length: n}, () => ({ imgIdx: null, status: 'empty', bboxW: 100 })) });
-  refreshRowList();
+// ── parse ──
+function parseInput(raw) {
+  var cleaned = sanitizeJSONText(raw);
+  var data;
+  try { data = JSON.parse(cleaned); }
+  catch(e1) { throw new Error('JSON 파싱 실패\n원인: ' + e1.message); }
+  if (!Array.isArray(data)) {
+    var k = Object.keys(data).find(function(key){ return Array.isArray(data[key]); });
+    if (k) data = data[k];
+    else throw new Error('JSON은 배열이어야 합니다.');
+  }
+  return data.filter(function(d){ return Array.isArray(d.cluster_bbox) && d.cluster_bbox.length === 4; });
+}
+function getClusters() { try { return parseInput(document.getElementById('jsonInput').value); } catch(e) { return []; } }
+
+// ── auto-assign: width match (runs automatically) ──
+function autoAssign() {
+  if (!images.length) return;
+  var cl; try { cl = parseInput(document.getElementById('jsonInput').value); } catch(e) { return; }
+  if (!cl.length) return;
+  var cs = cl.map(function(c){ return { cid: c.cluster_id, bw: c.cluster_bbox[2]-c.cluster_bbox[0] }; })
+             .sort(function(a,b){ return a.bw - b.bw; });
+  var imgs = images.map(function(img,i){ return { idx: i, nw: img.naturalWidth }; })
+                   .sort(function(a,b){ return a.nw - b.nw; });
+  cs.forEach(function(item, i){ assignments[item.cid] = imgs[i % imgs.length].idx; });
 }
 
-function addCellToRow(rowIdx) {
-  shelfRows[rowIdx].cells.push({ imgIdx: null, status: 'empty', bboxW: 100 });
-  refreshRowList();
+// JSON change with debounce → auto-assign
+function onJsonChange() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(function() {
+    if (images.length) { autoAssign(); refreshLibrary(); }
+  }, 120);
 }
 
-function removeCellFromRow(rowIdx, cellIdx) {
-  shelfRows[rowIdx].cells.splice(cellIdx, 1);
-  if (!shelfRows[rowIdx].cells.length) shelfRows.splice(rowIdx, 1);
-  refreshRowList();
-}
-
-function removeRow(rowIdx) {
-  shelfRows.splice(rowIdx, 1);
-  refreshRowList();
-}
-
-function clearAllRows() {
-  shelfRows = [];
-  refreshRowList();
-}
-
-function setStatus(rowIdx, cellIdx, status) {
-  const cell = shelfRows[rowIdx].cells[cellIdx];
-  cell.status = status;
-  if (status === 'empty') { cell.imgIdx = null; cell.bboxW = 100; }
-  refreshRowList();
-}
-
-function autoFill() {
-  if (!images.length) { alert('Upload images first.'); return; }
-  const perRow = parseInt(document.getElementById('newRowCells').value) || 5;
-  shelfRows = [];
-  let idx = 0;
-  while (idx < images.length) {
-    const slice = Math.min(perRow, images.length - idx);
-    const row = { cells: [] };
-    for (let i = 0; i < slice; i++) {
-      row.cells.push({
-        imgIdx: idx,
-        status: 'normal',
-        bboxW: images[idx].naturalWidth || 100,
-      });
-      idx++;
+// ── row grouping ──
+function groupRows(clusters) {
+  var sorted = clusters.slice().sort(function(a,b){ return a.cluster_bbox[1]-b.cluster_bbox[1]; });
+  var rows = [];
+  sorted.forEach(function(c) {
+    var y1=c.cluster_bbox[1], y2=c.cluster_bbox[3], matched=false;
+    for (var i=0; i<rows.length; i++) {
+      if (Math.min(rows[i].y2,y2) > Math.max(rows[i].y1,y1)) {
+        rows[i].items.push(c); rows[i].y1=Math.min(rows[i].y1,y1); rows[i].y2=Math.max(rows[i].y2,y2); matched=true; break;
+      }
     }
-    shelfRows.push(row);
-  }
-  refreshRowList();
+    if (!matched) rows.push({ items:[c], y1:y1, y2:y2 });
+  });
+  rows.sort(function(a,b){ return a.y1-b.y1; });
+  rows.forEach(function(r){ r.items.sort(function(a,b){ return a.cluster_bbox[0]-b.cluster_bbox[0]; }); });
+  return rows;
 }
 
-function refreshRowList() {
-  const list = document.getElementById('rowList');
-  if (!shelfRows.length) {
-    list.innerHTML = '<div style="font-size:11px;color:#bbb;padding:8px 0;text-align:center">Add shelf rows above, then assign images and statuses to each cell.</div>';
-    return;
-  }
-  list.innerHTML = '';
-  shelfRows.forEach((row, ri) => {
-    const rowEl = document.createElement('div');
-    rowEl.className = 'row-item';
+// ── build cells ──
+function buildCells(rows, mult, gx1, gx2) {
+  return rows.map(function(row) {
+    var items=row.items, cells=[];
+    var avgW = items.reduce(function(s,c){ return s+c.cluster_bbox[2]-c.cluster_bbox[0]; },0) / items.length;
+    var thr  = avgW * mult;
+    if (items[0].cluster_bbox[0]-gx1 >= thr) cells.push({ type:'empty', width: items[0].cluster_bbox[0]-gx1 });
+    items.forEach(function(c, i) {
+      cells.push({ type:'product', id:c.cluster_id, width:c.cluster_bbox[2]-c.cluster_bbox[0] });
+      if (i < items.length-1) { var g=items[i+1].cluster_bbox[0]-c.cluster_bbox[2]; if(g>=thr) cells.push({type:'empty',width:g}); }
+    });
+    if (gx2-items[items.length-1].cluster_bbox[2] >= thr) cells.push({ type:'empty', width:gx2-items[items.length-1].cluster_bbox[2] });
+    return { cells:cells, thr:Math.round(thr), avg:Math.round(avgW) };
+  });
+}
 
-    // Header
-    const header = document.createElement('div');
-    header.className = 'row-item-header';
-    header.innerHTML = `
-      <span class="row-label">Shelf row ${ri+1} — ${row.cells.length} cells</span>
-      <div class="row-actions">
-        <button class="btn-sm" onclick="addCellToRow(${ri})">+ cell</button>
-        <button class="btn-sm btn-danger" onclick="removeRow(${ri})">Remove row</button>
-      </div>
-    `;
-    rowEl.appendChild(header);
+// ── render ──
+function render() {
+  var errEl=document.getElementById('errorMsg'), statsEl=document.getElementById('statsBar'), cont=document.getElementById('realogramContainer');
+  var rh   = parseInt(document.getElementById('rowHeight').value) || 120;
+  var mw   = parseInt(document.getElementById('maxWidth').value)  || 960;
+  var mult = parseFloat(document.getElementById('multiplier').value) || 0.5;
+  errEl.style.display='none'; cont.innerHTML=''; statsEl.innerHTML=''; cont.style.maxWidth=mw+'px';
 
-    // Cell slots
-    const slots = document.createElement('div');
-    slots.className = 'cell-slots';
+  var clusters;
+  try { clusters = parseInput(document.getElementById('jsonInput').value); }
+  catch(e) { errEl.textContent=e.message; errEl.style.display='block'; return; }
+  if (!clusters.length) { errEl.textContent='cluster_bbox 항목이 없습니다.'; errEl.style.display='block'; return; }
 
-    row.cells.forEach((cell, ci) => {
-      const slot = document.createElement('div');
-      slot.className = 'cell-slot';
+  var gx1 = Math.min.apply(null, clusters.map(function(c){ return c.cluster_bbox[0]; }));
+  var gx2 = Math.max.apply(null, clusters.map(function(c){ return c.cluster_bbox[2]; }));
+  var rows = groupRows(clusters), rd = buildCells(rows, mult, gx1, gx2);
 
-      const hasImg = cell.imgIdx !== null && images[cell.imgIdx];
-      const isEff  = cell.status === 'empty' || !hasImg;
+  var tP=0, tE=0, tOos=0, tMis=0, tLow=0, tImg=0;
+  rd.forEach(function(r){ r.cells.forEach(function(c) {
+    if (c.type==='product') {
+      tP++;
+      var ix  = assignments[c.id];
+      var st  = (ix !== null && ix !== undefined && images[ix]) ? (imageStatuses[ix]||'normal') : 'normal';
+      if (st==='oos') tOos++; else if (st==='misplaced') tMis++; else if (st==='low') tLow++;
+      if (ix !== null && ix !== undefined && images[ix]) tImg++;
+    } else tE++;
+  }); });
 
-      // Thumb
-      const thumb = document.createElement('div');
-      thumb.className = 'slot-thumb' + (isEff ? ' is-empty' : '');
-      thumb.onclick = () => openPicker(ri, ci);
+  statsEl.innerHTML =
+    '<div class="stat-pill"><div class="stat-dot" style="background:#aaa"></div>Rows: '+rows.length+'</div>'+
+    '<div class="stat-pill"><div class="stat-dot" style="background:#b5d4f4"></div>Products: '+tP+'</div>'+
+    '<div class="stat-pill"><div class="stat-dot" style="background:#c8c5bf;border:1.5px dashed #bbb"></div>Empty: '+tE+'</div>'+
+    (tOos?'<div class="stat-pill"><div class="stat-dot" style="background:#e8001e"></div>OOS: '+tOos+'</div>':'')+
+    (tMis?'<div class="stat-pill"><div class="stat-dot" style="background:#00b0e8"></div>Misplaced: '+tMis+'</div>':'')+
+    (tLow?'<div class="stat-pill"><div class="stat-dot" style="background:#f5c800;border:0.5px solid #e0b000"></div>LOW: '+tLow+'</div>':'')+
+    (tImg?'<div class="stat-pill"><div class="stat-dot" style="background:#c0dd97"></div>이미지 매핑: '+tImg+'</div>':'')+
+    '<div class="stat-pill"><div class="stat-dot" style="background:#fac775"></div>Auto thr: avg x'+mult.toFixed(2)+'</div>';
 
-      if (hasImg && cell.status !== 'empty') {
-        thumb.innerHTML = `
-          <img src="${images[cell.imgIdx].url}" alt="">
-          <div class="assign-hint">Click to<br>change image</div>
-        `;
+  rd.forEach(function(rowData, ri) {
+    var totW  = rowData.cells.reduce(function(s,c){ return s+c.width; }, 0);
+    var wrap  = document.createElement('div'); wrap.className='shelf-row-wrapper';
+    var lbl   = document.createElement('div'); lbl.className='row-label';
+    lbl.innerHTML = 'Row '+(ri+1)+'<span class="row-threshold">avg '+rowData.avg+'px<br>thr '+rowData.thr+'px</span>';
+    wrap.appendChild(lbl);
+    var rowEl = document.createElement('div'); rowEl.className='shelf-row'; rowEl.style.height=(rh+8)+'px';
+
+    rowData.cells.forEach(function(cell) {
+      var pct = (cell.width/totW*100).toFixed(2);
+      if (cell.type === 'product') {
+        var ix     = assignments[cell.id];
+        var imgObj = (ix !== null && ix !== undefined) ? images[ix] : null;
+        var st     = (imgObj && imageStatuses[ix]) ? imageStatuses[ix] : 'normal';
+        var el     = document.createElement('div'); el.className='r-cell'; el.style.flexBasis=pct+'%'; el.style.height=rh+'px';
+        if (st==='oos')       el.classList.add('border-oos');
+        else if (st==='misplaced') el.classList.add('border-misplaced');
+        else if (st==='low')  el.classList.add('border-low');
+        if (imgObj) {
+          el.classList.add('has-img');
+          var im2=document.createElement('img'); im2.src=imgObj.url; im2.alt=''; el.appendChild(im2);
+          var ov=document.createElement('span'); ov.className='cell-id-overlay'; ov.textContent='P'+cell.id; el.appendChild(ov);
+        } else {
+          el.style.background = PALETTE[(cell.id-1)%PALETTE.length];
+          var fs = Math.min(18, Math.max(9, Math.round(cell.width/14)));
+          var idDiv=document.createElement('div'); idDiv.className='cell-id'; idDiv.style.fontSize=fs+'px'; idDiv.textContent='P'+cell.id; el.appendChild(idDiv);
+        }
+        if (st !== 'normal') {
+          var badge=document.createElement('div'); badge.className='status-badge badge-'+st; badge.textContent=STATUS_LABELS[st]; el.appendChild(badge);
+        }
+        var wpx=document.createElement('span'); wpx.className='cell-wpx'; wpx.textContent=cell.width+'px'; el.appendChild(wpx);
+        rowEl.appendChild(el);
       } else {
-        thumb.innerHTML = `
-          <div class="slot-empty-icon"></div>
-          <div class="slot-empty-text">empty</div>
-          <div class="assign-hint" style="display:flex">Click to<br>assign image</div>
-        `;
+        var el=document.createElement('div'); el.className='r-cell-empty'; el.style.flexBasis=pct+'%'; el.style.height=rh+'px';
+        el.innerHTML='<div class="empty-icon"></div><div class="empty-label">Empty</div><span class="empty-wpx">'+cell.width+'px</span>';
+        rowEl.appendChild(el);
       }
-      slot.appendChild(thumb);
-
-      // Controls
-      const ctrl = document.createElement('div');
-      ctrl.className = 'slot-controls';
-
-      // Status buttons — color dots
-      const statusRow = document.createElement('div');
-      statusRow.className = 'slot-status-row';
-      STATUS_LIST.forEach(s => {
-        const btn = document.createElement('button');
-        const isActive = cell.status === s;
-        btn.className = `status-btn sb-${s}${isActive ? ' active' : ''}`;
-        btn.title = STATUS_LABELS[s];
-        btn.innerHTML = `<span class="sb-check">✓</span>`;
-        btn.onclick = () => setStatus(ri, ci, s);
-        statusRow.appendChild(btn);
-      });
-      ctrl.appendChild(statusRow);
-
-      // Bottom: empty toggle + remove
-      const bottomRow = document.createElement('div');
-      bottomRow.className = 'slot-bottom-row';
-
-      const emptyBtn = document.createElement('button');
-      emptyBtn.className = 'slot-img-selector' + (cell.status === 'empty' ? ' active-empty' : '');
-      emptyBtn.textContent = cell.status === 'empty' ? '∅ Empty' : '∅ Set empty';
-      emptyBtn.style.cssText = cell.status === 'empty' ? 'background:#f0ede8;color:#999;border-color:#d0ccc5;' : '';
-      emptyBtn.onclick = () => setStatus(ri, ci, 'empty');
-
-      const removeBtn = document.createElement('button');
-      removeBtn.className = 'slot-remove';
-      removeBtn.textContent = '✕';
-      removeBtn.onclick = () => removeCellFromRow(ri, ci);
-
-      bottomRow.appendChild(emptyBtn);
-      bottomRow.appendChild(removeBtn);
-      ctrl.appendChild(bottomRow);
-
-      slot.appendChild(ctrl);
-      slots.appendChild(slot);
     });
-
-    rowEl.appendChild(slots);
-    list.appendChild(rowEl);
+    wrap.appendChild(rowEl); cont.appendChild(wrap);
   });
 }
 
-/* ═══════════════════════
-   Image Picker Modal
-═══════════════════════ */
-function openPicker(rowIdx, cellIdx) {
-  pickerTarget = { rowIdx, cellIdx };
-  const grid = document.getElementById('pickerGrid');
-  grid.innerHTML = '';
-
-  // Empty option
-  const emptyOpt = document.createElement('div');
-  emptyOpt.className = 'picker-empty-btn';
-  emptyOpt.innerHTML = '<div style="font-size:18px;color:#ccc">∅</div><span>Set empty</span>';
-  emptyOpt.onclick = () => { assignImage(null); closePicker(); };
-  grid.appendChild(emptyOpt);
-
-  images.forEach((img, i) => {
-    const item = document.createElement('div');
-    item.className = 'picker-item';
-    item.innerHTML = `<img src="${img.url}" alt=""><div class="picker-label">${i+1}. ${img.name}</div>`;
-    item.onclick = () => { assignImage(i); closePicker(); };
-    grid.appendChild(item);
-  });
-
-  document.getElementById('pickerOverlay').classList.add('open');
-}
-
-function assignImage(imgIdx) {
-  if (!pickerTarget) return;
-  const cell = shelfRows[pickerTarget.rowIdx].cells[pickerTarget.cellIdx];
-  cell.imgIdx = imgIdx;
-  if (imgIdx === null) {
-    cell.status = 'empty';
-    cell.bboxW = 100;
-  } else {
-    cell.status = cell.status === 'empty' ? 'normal' : cell.status;
-    // Use image's natural width as the relative cell width
-    cell.bboxW = images[imgIdx].naturalWidth || 100;
-  }
-  refreshRowList();
-}
-
-function closePicker() {
-  document.getElementById('pickerOverlay').classList.remove('open');
-  pickerTarget = null;
-}
-
-document.getElementById('pickerOverlay').addEventListener('click', e => {
-  if (e.target === e.currentTarget) closePicker();
-});
-
-/* ═══════════════════════
-   Render Canvas
-═══════════════════════ */
-function renderCanvas() {
-  const showPct = document.getElementById('showPct').checked;
-  const container = document.getElementById('realogramContainer');
-  container.style.maxWidth = maxWidthPx + 'px';
-  container.innerHTML = '';
-
-  let tNormal=0, tEmpty=0, tOos=0, tMisplaced=0, tLow=0;
-
-  shelfRows.forEach(row => {
-    const totalW = row.cells.reduce((s,c) => s + (c.bboxW||100), 0);
-
-    const rowEl = document.createElement('div');
-    rowEl.className = 'shelf-row';
-    // Row height accounts for top/bottom padding (4px each) inside shelf-row
-    rowEl.style.height = (rowHeightPx + 8) + 'px';
-
-    row.cells.forEach(cell => {
-      const bboxW = cell.bboxW || 100;
-      const pct   = (bboxW / totalW * 100).toFixed(1);
-      const st    = cell.status;
-      const hasImg = st !== 'empty' && cell.imgIdx !== null && images[cell.imgIdx];
-
-      // Count
-      if (st === 'empty') tEmpty++;
-      else if (st === 'oos') tOos++;
-      else if (st === 'misplaced') tMisplaced++;
-      else if (st === 'low') tLow++;
-      else tNormal++;
-
-      const cellEl = document.createElement('div');
-      cellEl.className = `r-cell st-${hasImg ? st : (st === 'empty' ? 'empty' : 'normal')}`;
-      cellEl.style.flexBasis = pct + '%';
-      cellEl.style.height = rowHeightPx + 'px';
-      cellEl.style.flexShrink = '0';
-
-      // Border for special statuses
-      if (st === 'oos')       cellEl.classList.add('border-oos');
-      if (st === 'misplaced') cellEl.classList.add('border-misplaced');
-      if (st === 'low')       cellEl.classList.add('border-low');
-
-      // Image
-      if (hasImg) {
-        const img = document.createElement('img');
-        img.src = images[cell.imgIdx].url;
-        img.alt = '';
-        cellEl.appendChild(img);
-      } else if (st === 'empty') {
-        cellEl.innerHTML = `<div class="empty-inner2"><div class="empty-box"></div></div>`;
-      }
-
-      // Status badge (top bar) — not for normal
-      if (st !== 'normal' && st !== 'empty') {
-        const badge = document.createElement('div');
-        badge.className = `status-badge badge-${st}`;
-        badge.textContent = STATUS_LABELS[st];
-        cellEl.appendChild(badge);
-      }
-
-      // % label
-      if (showPct) {
-        const pctEl = document.createElement('span');
-        pctEl.className = 'cell-pct';
-        pctEl.textContent = pct + '%';
-        cellEl.appendChild(pctEl);
-      }
-
-      rowEl.appendChild(cellEl);
-    });
-
-    container.appendChild(rowEl);
-  });
-
-  // Stats
-  const total = tNormal + tEmpty + tOos + tMisplaced + tLow;
-  document.getElementById('statsBar').innerHTML = `
-    <div class="stat-pill"><div class="stat-dot" style="background:#bbb"></div>Total ${total}</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:#ccc"></div>Normal ${tNormal}</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:#d0ccc5"></div>Empty ${tEmpty}</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:#e8001e"></div>OOS ${tOos}</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:#00b0e8"></div>Misplaced ${tMisplaced}</div>
-    <div class="stat-pill"><div class="stat-dot" style="background:#f5c800"></div>LOW ${tLow}</div>
-  `;
-}
-
-/* ═══════════════════════
-   Controls
-═══════════════════════ */
-function onRowHeight(v) {
-  rowHeightPx = parseInt(v);
-  document.getElementById('rowHeightVal').textContent = v + 'px';
-  renderCanvas();
-}
-function onMaxWidth(v) {
-  maxWidthPx = parseInt(v) || 960;
-  renderCanvas();
-}
-
-/* ═══════════════════════
-   Mock Scenarios
-═══════════════════════ */
-const MOCK_COLORS = ['#f5c4b3','#c0dd97','#b5d4f4','#fac775','#f4c0d1','#d3d1c7','#cecbf6','#c0dd97','#f5c4b3'];
-
-function loadMock(key) {
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById(`tab-${key}`).classList.add('active');
-  images = [];
-  shelfRows = [];
-
-  const mockDefs = {
-    noEmpty: [
-      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
-      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
-      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'}],
-    ],
-    mixed: [
-      [{st:'normal'},{st:'empty'},{st:'normal'},{st:'empty'},{st:'normal'}],
-      [{st:'normal'},{st:'normal'},{st:'empty'},{st:'normal'},{st:'empty'},{st:'normal'}],
-      [{st:'empty'},{st:'empty'},{st:'normal'},{st:'normal'},{st:'empty'},{st:'normal'}],
-      [{st:'normal'},{st:'empty'},{st:'empty'},{st:'normal'},{st:'normal'}],
-    ],
-    oos: [
-      [{st:'low',bboxW:200},{st:'empty'},{st:'oos'},{st:'misplaced'},{st:'normal'}],
-      [{st:'normal'},{st:'normal'},{st:'oos'},{st:'normal'},{st:'oos',bboxW:200},{st:'misplaced'},{st:'normal'}],
-      [{st:'oos'},{st:'normal'},{st:'empty'},{st:'normal'},{st:'low'},{st:'normal'},{st:'normal'}],
-      [{st:'oos'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'normal'},{st:'misplaced',bboxW:200}],
-      [{st:'normal'},{st:'normal'},{st:'normal'},{st:'oos'},{st:'empty'},{st:'normal'},{st:'normal'}],
-    ],
-  };
-
-  // Generate placeholder images (colored blocks) for mock
-  let imgCounter = 0;
-  const getImgIdx = (color) => {
-    const canvas = document.createElement('canvas');
-    canvas.width = 120; canvas.height = 120;
-    const ctx = canvas.getContext('2d');
-    ctx.fillStyle = color || MOCK_COLORS[imgCounter % MOCK_COLORS.length];
-    ctx.fillRect(0,0,120,120);
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.font = 'bold 24px sans-serif';
-    ctx.textAlign = 'center';
-    ctx.fillText(`P${imgCounter+1}`, 60, 68);
-    // Mock images all have naturalWidth = 120 (square), bboxW comes from mockDef
-    images.push({ url: canvas.toDataURL(), name: `Product ${imgCounter+1}`, naturalWidth: 120 });
-    return imgCounter++;
-  };
-
-  mockDefs[key].forEach(rowDef => {
-    const row = { cells: [] };
-    rowDef.forEach(c => {
-      const isEmp = c.st === 'empty';
-      row.cells.push({
-        imgIdx: isEmp ? null : getImgIdx(null),
-        status: c.st,
-        bboxW:  c.bboxW || 100,
-      });
-    });
-    shelfRows.push(row);
-  });
-
-  refreshLibrary();
-  renderCanvas();
-}
-
-/* ── Init ── */
-renderCanvas();
+window.addEventListener('load', function(){ render(); });
 </script>
 </body>
 </html>
