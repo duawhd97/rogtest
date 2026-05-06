@@ -1,433 +1,403 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Virtual ROG v6</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Virtual ROG Renderer — Sample</title>
+  <script src="./vrog-renderer-improved.js"></script>
   <style>
-    *{box-sizing:border-box;margin:0;padding:0}
-    body{font-family:'Segoe UI',Arial,sans-serif;background:#f0f0ee;padding:24px;color:#1a1a1a;font-size:13px}
-    h1{font-size:15px;font-weight:600;margin-bottom:3px}
-    .subtitle{font-size:11px;color:#999;margin-bottom:14px}
-    .panel{background:white;border:0.5px solid #ddd;border-radius:10px;padding:16px 18px;margin-bottom:14px}
-    .panel-title{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:#999;margin-bottom:12px}
-    .controls{display:flex;flex-wrap:wrap;gap:20px;align-items:flex-start}
-    .cg{display:flex;flex-direction:column;gap:5px;font-size:12px;color:#555}
-    .cg-row{display:flex;align-items:center;gap:7px}
-    .cg-hint{font-size:10px;color:#bbb;margin-top:1px}
-    input[type=range]{width:120px;cursor:pointer}
-    input[type=number]{width:58px;padding:3px 6px;border:0.5px solid #ccc;border-radius:5px;font-size:12px}
-    button{padding:5px 12px;font-size:12px;border:0.5px solid #ccc;border-radius:6px;background:white;cursor:pointer;transition:background .1s}
-    button:hover{background:#f5f5f5}
-    .btn-primary{background:#1a1a1a!important;color:white!important;border-color:#1a1a1a!important;padding:8px 22px!important;font-size:13px!important}
-    .btn-sm{padding:3px 8px!important;font-size:11px!important}
-    .btn-danger{color:#c0392b!important;border-color:#e0b0aa!important}
-    .btn-danger:hover{background:#fff5f5!important}
-    .json-input{width:100%;height:160px;font-family:'Courier New',monospace;font-size:11px;border:0.5px solid #ddd;border-radius:7px;padding:10px 12px;resize:vertical;color:#333;background:#fafafa;line-height:1.5}
-    .json-input:focus{outline:none;border-color:#aaa;background:white}
-    .input-helper{font-size:10px;color:#bbb;margin-top:5px}
-    .drop-zone{border:1.5px dashed #ccc;border-radius:8px;padding:14px 12px;text-align:center;font-size:12px;color:#999;cursor:pointer;transition:border-color .15s}
-    .drop-zone:hover,.drop-zone.drag-over{border-color:#888;color:#555}
-    .drop-zone small{display:block;font-size:10px;color:#bbb;margin-top:3px}
-    .img-library{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
-    .img-card{width:84px;border:1.5px solid #e0e0e0;border-radius:8px;overflow:hidden;background:white;position:relative;transition:border-color .12s}
-    .img-card .thumb{width:100%;height:60px;display:flex;align-items:center;justify-content:center;background:#f9f9f9;overflow:hidden}
-    .img-card .thumb img{width:100%;height:100%;object-fit:contain}
-    .img-card .img-name{font-size:9px;color:#888;padding:3px 5px 1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}
-    .img-card .img-wpx{font-size:8px;color:#aaa;padding:0 5px 3px;text-align:center}
-    .img-card .img-idx{position:absolute;top:3px;left:4px;font-size:8px;font-weight:600;color:#fff;background:rgba(0,0,0,.4);padding:1px 4px;border-radius:3px}
-    .img-card .remove-img{position:absolute;top:2px;right:3px;width:14px;height:14px;background:rgba(0,0,0,.4);border:none;border-radius:50%;color:white;font-size:9px;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0}
-    .img-status-row{display:flex;gap:4px;justify-content:center;padding:3px 4px 6px}
-    .img-status-btn{width:14px;height:14px;border-radius:50%;border:2px solid transparent;cursor:pointer;padding:0;flex-shrink:0;transition:all .1s}
-    .img-status-btn:hover{transform:scale(1.2)}
-    .img-status-btn.isb-normal{background:#d0d0ce}
-    .img-status-btn.isb-oos{background:#e8001e}
-    .img-status-btn.isb-misplaced{background:#00b0e8}
-    .img-status-btn.isb-low{background:#f5c800}
-    .img-status-btn.active{border-color:#1a1a1a;transform:scale(1.1)}
-    .img-status-btn.isb-low.active{border-color:#555}
-    .img-card.st-oos{border-color:#e8001e}
-    .img-card.st-misplaced{border-color:#00b0e8}
-    .img-card.st-low{border-color:#f5c800}
-    .stats-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
-    .stat-pill{display:flex;align-items:center;gap:5px;font-size:11px;color:#666;background:white;border:0.5px solid #e5e5e5;padding:3px 10px;border-radius:20px}
-    .stat-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-    .realogram-outer{background:#e8e8e6;border:0.5px solid #d0d0ce;border-radius:12px;padding:16px 12px;margin-bottom:14px}
-    .realogram-container{display:flex;flex-direction:column;gap:8px}
-    .shelf-row-wrapper{display:flex;align-items:center;gap:8px}
-    .row-label{width:48px;font-size:10px;color:#aaa;text-align:right;flex-shrink:0;line-height:1.5}
-    .row-threshold{font-size:8px;color:#ccc;display:block;margin-top:1px}
-    .shelf-row{flex:1;display:flex;background:white;border:1.5px solid #d0d0ce;border-radius:8px;overflow:hidden;padding:4px;gap:4px}
-    .r-cell{flex-shrink:0;position:relative;overflow:hidden;border-radius:5px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(0,0,0,.08);background:white}
-    .r-cell .cell-id{font-weight:700;color:rgba(0,0,0,.55);pointer-events:none;text-align:center;line-height:1.2}
-    .r-cell .cell-wpx{position:absolute;bottom:3px;right:4px;font-size:8px;color:rgba(0,0,0,.3);pointer-events:none;z-index:3}
-    .r-cell.has-img img{width:100%;height:100%;object-fit:contain;display:block;position:absolute;inset:0}
-    .r-cell.has-img .cell-id-overlay{position:absolute;bottom:3px;left:4px;background:rgba(0,0,0,.45);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:3px;pointer-events:none;z-index:3}
-    .r-cell.has-img .cell-wpx{color:rgba(255,255,255,.5)}
-    /* ★ 텍스트 없이 border만 */
-    .border-oos{border:3px solid #e8001e!important}
-    .border-misplaced{border:3px solid #00b0e8!important}
-    .border-low{border:3px solid #f5c800!important}
-    .r-cell-empty{flex-shrink:0;position:relative;overflow:hidden;border-radius:5px;background:#f2f0ec;border:1.5px dashed #c8c5bf;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
-    .empty-icon{width:18px;height:18px;border:1.5px dashed #bbb;border-radius:3px}
-    .empty-label{font-size:8px;font-weight:700;color:#bbb;letter-spacing:.07em;text-transform:uppercase}
-    .empty-wpx{position:absolute;bottom:3px;right:4px;font-size:8px;color:#ccc}
-    .legend{display:flex;gap:12px;flex-wrap:wrap;font-size:11px;color:#888;padding:10px 14px;background:white;border:0.5px solid #e5e5e5;border-radius:8px;margin-bottom:6px}
-    .legend-item{display:flex;align-items:center;gap:5px}
-    .legend-box{width:13px;height:13px;border-radius:3px}
-    .error-msg{background:#fff5f5;border:0.5px solid #f5c0bb;border-radius:7px;padding:10px 14px;font-size:12px;color:#c0392b;margin-bottom:12px;display:none;white-space:pre-line}
-    .render-row{display:flex;gap:10px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #f4f5f9; --surface: #fff; --border: #e2e5ef;
+      --accent: #09263f; --text: #1a1b2e; --muted: #6b7280;
+      --danger: #dc2626;
+      font-family: 'Segoe UI', system-ui, sans-serif; font-size: 13px;
+    }
+    body { background: var(--bg); color: var(--text); min-height: 100vh; padding: 24px; }
+
+    h1 { font-size: 18px; font-weight: 700; margin-bottom: 20px; }
+
+    /* Query form */
+    .form-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 12px;
+      padding: 20px 24px; display: flex; flex-wrap: wrap; gap: 12px; align-items: flex-end;
+      margin-bottom: 24px;
+    }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    .field label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+    .field input {
+      padding: 7px 10px; border-radius: 7px; border: 1px solid var(--border);
+      background: var(--bg); color: var(--text); font-size: 13px; font-family: inherit; width: 180px;
+    }
+    .field input:focus { outline: 1px solid var(--accent); }
+    .btn {
+      padding: 8px 18px; border-radius: 7px; border: none;
+      background: var(--accent); color: #fff; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: inherit; white-space: nowrap;
+    }
+    .btn:hover { opacity: .88; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn.secondary {
+      background: transparent; border: 1px solid var(--border); color: var(--text); font-weight: 400;
+    }
+    .btn.secondary:hover { background: rgba(0,0,0,0.04); }
+
+    /* Error banner */
+    .error-bar {
+      background: rgba(220,38,38,0.08); border: 1px solid var(--danger); border-radius: 8px;
+      padding: 10px 14px; color: var(--danger); font-size: 12px; margin-bottom: 16px; display: none;
+    }
+
+    /* Main panels */
+    .panels { display: flex; gap: 16px; }
+    .panel {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 14px;
+      overflow: hidden; flex: 1; min-width: 0;
+    }
+    .panel-header {
+      padding: 10px 16px; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+    }
+    .panel-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); }
+    .panel-body { padding: 14px 18px; }
+
+    /* Background color toggle swatches */
+    .bg-toggle { display: flex; gap: 4px; }
+    .bg-swatch {
+      width: 20px; height: 16px; border-radius: 3px; border: 1.5px solid var(--border);
+      cursor: pointer; transition: border-color .15s, transform .15s;
+    }
+    .bg-swatch:hover, .bg-swatch.active { border-color: var(--accent); transform: scale(1.08); }
+    .bg-swatch.dark  { background: #111; }
+    .bg-swatch.light { background: #e0e2e8; }
+    .bg-swatch.white { background: #fff; }
+
+    /* VROG canvas wrapper */
+    .vrog-wrap {
+      background: #e8eaef; border-radius: 10px; display: flex;
+      align-items: center; justify-content: center; min-height: 180px; overflow: hidden;
+      box-shadow: inset 0 0 20px rgba(0,0,0,0.06);
+      transition: background 0.25s ease;
+    }
+    .vrog-wrap.dark-bg { background: #15171c; box-shadow: inset 0 0 20px rgba(0,0,0,0.3); }
+    .vrog-wrap.white-bg { background: #ffffff; box-shadow: inset 0 0 20px rgba(0,0,0,0.04); }
+
+    /* Product list panel */
+    .product-panel { width: 280px; flex-shrink: 0; }
+    .list-section { margin-bottom: 12px; }
+    .list-title {
+      font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: var(--muted); margin-bottom: 6px; display: flex; align-items: center; gap: 6px;
+    }
+    .count-badge {
+      background: rgba(0,0,0,0.06); border-radius: 10px; padding: 1px 7px;
+      font-size: 10px; font-weight: 600; color: var(--muted);
+    }
+    .product-list { display: flex; flex-direction: column; gap: 2px; max-height: 220px; overflow-y: auto; }
+    .product-row {
+      display: flex; align-items: center; gap: 8px; padding: 5px 8px;
+      border-radius: 6px; cursor: default; transition: background .1s;
+    }
+    .product-row:hover { background: rgba(9,38,63,0.06); }
+    .product-code { font-size: 10px; color: var(--muted); font-family: monospace; flex-shrink: 0; }
+    .product-name { font-size: 12px; color: var(--text); flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status-badge {
+      font-size: 9px; font-weight: 700; padding: 1px 6px; border-radius: 10px; flex-shrink: 0;
+      text-transform: uppercase;
+    }
+    .s-oos { background: #fee2e2; color: #b91c1c; }
+    .s-ls  { background: #fef9c3; color: #92400e; }
+    .s-mis { background: #ede9fe; color: #5b21b6; }
+
+    .empty-msg { color: var(--muted); font-size: 12px; padding: 8px 0; }
+
+    /* Loading status bar */
+    .status-bar {
+      margin-bottom: 16px; font-size: 12px; color: var(--muted);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .spinner {
+      width: 14px; height: 14px; border: 2px solid var(--border);
+      border-top-color: var(--accent); border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-<h1>Virtual ROG v6</h1>
-<p class="subtitle">cluster_bbox 기반 빈 공간 감지 &middot; 이미지에서 OOS/Misplaced/LOW 설정 &middot; Width Match 자동 매핑</p>
+  <h1>Virtual ROG Renderer — Sample</h1>
 
-<div class="panel">
-  <div class="panel-title">Display Settings</div>
-  <div class="controls">
-    <div class="cg">
-      <div class="cg-row">
-        <label>Gap sensitivity</label>
-        <input type="range" id="multiplier" min="0.3" max="1.0" value="0.5" step="0.05"
-          oninput="document.getElementById('mVal').textContent='x'+parseFloat(this.value).toFixed(2);render()">
-        <span id="mVal">x0.50</span>
-      </div>
-      <div class="cg-hint">빈 공간 감지 = 층 평균 width x 배율</div>
+  <!-- Query form -->
+  <div class="form-card">
+    <div class="field">
+      <label>Company</label>
+      <input id="inp-company" type="text" placeholder="e.g. SDM" value="SDM" />
     </div>
-    <div class="cg">
-      <div class="cg-row">
-        <label>Row height</label>
-        <input type="range" id="rowHeight" min="60" max="200" value="120"
-          oninput="document.getElementById('rhVal').textContent=this.value+'px';render()">
-        <span id="rhVal">120px</span>
-      </div>
+    <div class="field">
+      <label>Store</label>
+      <input id="inp-store" type="text" placeholder="e.g. SDM" value="SDM" />
     </div>
-    <div class="cg">
-      <div class="cg-row">
-        <label>Max width</label>
-        <input type="number" id="maxWidth" value="960" min="400" max="1600" step="10" oninput="render()">
-        <span>px</span>
+    <div class="field">
+      <label>Shelf ID</label>
+      <input id="inp-shelf" type="text" placeholder="e.g. A02-001" value="A02-001" />
+    </div>
+    <button class="btn" id="btn-fetch" onclick="fetchAndRender()">Search</button>
+    <button class="btn secondary" id="btn-clear" onclick="clearAll()" style="display:none">Clear</button>
+  </div>
+
+  <div class="error-bar" id="error-bar"></div>
+  <div class="status-bar" id="status-bar" style="display:none">
+    <div class="spinner"></div><span id="status-text">Loading…</span>
+  </div>
+
+  <!-- Result panels — hidden until data is loaded -->
+  <div id="main-content" style="display:none">
+    <div class="panels">
+      <!-- Reference ROG panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Reference ROG</span>
+          <div class="bg-toggle" id="rog-bg-toggle">
+            <div class="bg-swatch dark  active" onclick="setBg('rog','#000000',this)"></div>
+            <div class="bg-swatch light"        onclick="setBg('rog','#ffffff',this)"></div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="vrog-wrap" id="rog-container"></div>
+        </div>
+      </div>
+
+      <!-- Current shelf state panel -->
+      <div class="panel">
+        <div class="panel-header">
+          <span class="panel-title">Current State</span>
+          <div class="bg-toggle" id="shelf-bg-toggle">
+            <div class="bg-swatch dark  active" onclick="setBg('shelf','#000000',this)"></div>
+            <div class="bg-swatch light"        onclick="setBg('shelf','#ffffff',this)"></div>
+          </div>
+        </div>
+        <div class="panel-body">
+          <div class="vrog-wrap" id="shelf-container"></div>
+        </div>
+      </div>
+
+      <!-- Product list -->
+      <div class="panel product-panel">
+        <div class="panel-header">
+          <span class="panel-title">Products</span>
+        </div>
+        <div class="panel-body">
+          <div class="list-section">
+            <div class="list-title">
+              All Products
+              <span class="count-badge" id="all-count">0</span>
+            </div>
+            <div class="product-list" id="all-list"></div>
+          </div>
+          <div class="list-section">
+            <div class="list-title">
+              Alerts
+              <span class="count-badge" id="alert-count">0</span>
+            </div>
+            <div class="product-list" id="alert-list"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
-</div>
 
-<div class="panel">
-  <div class="panel-title">1 &middot; cluster_bbox JSON Input</div>
-  <textarea class="json-input" id="jsonInput" spellcheck="false"
-    oninput="onJsonChange()"
-    placeholder="JSON을 붙여넣으세요. 코드블록(```json)이나 설명 텍스트가 있어도 자동 처리됩니다."></textarea>
-  <div class="input-helper">cluster_bbox: [x1, y1, x2, y2] &middot; 메모장/Notes 복붙 OK</div>
-</div>
+  <script>
+    const API_BASE  = 'https://asia.common.solumesl.com/vision/api/v2/common/visions';
+    const API_TOKEN = 'eyJhbGciOiJSUzI1NiIsImtpZCI6Ilg1ZVhrNHh5b2pORnVtMWtsMll0djhkbE5QNC1jNTdkTzZRR1RWQndhTmsiLCJ0eXAiOiJKV1QifQ.eyJhdWQiOiJlMDhlNTRmZi01YmIxLTRhZTctYWZkZS1iOWNkYzhmYTIzYWUiLCJpc3MiOiJodHRwczovL3NvbHVtYjJjLmIyY2xvZ2luLmNvbS9iMGM4ZTNkOS0wOGZhLTQ4N2EtYWZmMS04NWJhZTExZmM2YzUvdjIuMC8iLCJleHAiOjE3NzgxMzA3NzksIm5iZiI6MTc3ODA0NDM3OSwiaWRwIjoiTG9jYWxBY2NvdW50Iiwib2lkIjoiN2ViMjY0ZGYtN2NiZS00ZmJhLTk5NTktMWM1NjEzMDhiYjA4Iiwic3ViIjoiN2ViMjY0ZGYtN2NiZS00ZmJhLTk5NTktMWM1NjEzMDhiYjA4IiwibmFtZSI6Inl1bmJpbi5jaGFuZyIsIm5ld1VzZXIiOmZhbHNlLCJleHRlbnNpb25fQWRtaW5BcHByb3ZlZCI6dHJ1ZSwiZXh0ZW5zaW9uX0N1c3RvbWVyQ29kZSI6IlNPTFVNIiwiZXh0ZW5zaW9uX0N1c3RvbWVyTGV2ZWwiOiIxIiwiZXh0ZW5zaW9uX1JlYWRPbmx5IjpmYWxzZSwiZXh0ZW5zaW9uX2VtYWlsQ29uZmlnIjoiMDAwMDAwMDAwMDAwIiwiZXh0ZW5zaW9uX3RuYyI6dHJ1ZSwiZXh0ZW5zaW9uX21mYSI6dHJ1ZSwiZW1haWxzIjpbInl1bmJpbi5jaGFuZ0Bzb2x1LW0uY29tIl0sInRmcCI6IkIyQ18xX1JPUENfQXV0aCIsImF6cCI6ImUwOGU1NGZmLTViYjEtNGFlNy1hZmRlLWI5Y2RjOGZhMjNhZSIsInZlciI6IjEuMCIsImlhdCI6MTc3ODA0NDM3OX0.JNruFy3XHfqp4UrORClbyA_5BkRXe9lu_IwPPeedLuI5COZDkpgjXoZPs6aEyWYKUFdg6ZGkPzNeI3jr9Ocm9gO0xjAXemLsWFk09Q2R0Af1XrLmsEU__UOft06PYZeGd_KnTqlateDu_bu7mkD8CJC27i5iSiE-rfjby5X0SQMZ2mbKT32Q20Uk5E7bovuMA4ePGS54LcydbTStY_uYz-gNbQWaFaPToC1GbjRR7RTztXanl6RYFsf28U4zozVfz1XtSqlrffzLM3jna-zDvmaZC55SXlDkFra5x1lzg1_8CcG4oGNzY7lMqdB9ry1MHMAKO052XTnqpE_mJREx_A';
 
-<div class="panel">
-  <div class="panel-title">2 &middot; Image Library <span style="font-weight:400;color:#bbb;text-transform:none;letter-spacing:0">(optional)</span></div>
-  <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
-    Drag &amp; drop or click to upload product images
-    <small>업로드 후 각 이미지 카드에서 ⚫ Normal &middot; 🔴 OOS &middot; 🔵 Misplaced &middot; 🟡 LOW 설정</small>
-  </div>
-  <input type="file" id="fileInput" multiple accept="image/*" style="display:none" onchange="handleFiles(this.files)">
-  <div class="img-library" id="imgLibrary"></div>
-  <div id="libActions" style="display:none;margin-top:10px;gap:8px;align-items:center">
-    <button class="btn-sm" onclick="autoAssign()">&#9889; Re-assign (width match)</button>
-    <button class="btn-sm btn-danger" onclick="clearLibrary()">Clear all</button>
-    <span id="assignInfo" style="font-size:10px;color:#aaa"></span>
-  </div>
-</div>
+    const ALERT_SET = new Set(['oos', 'ls', 'mis']);
 
-<div class="render-row">
-  <button class="btn-primary" onclick="render()">Render Virtual ROG &#8595;</button>
-</div>
+    let rogRenderer   = null;
+    let shelfRenderer = null;
+    let currentDetail = null;
 
-<div class="error-msg" id="errorMsg"></div>
-<div class="stats-bar" id="statsBar"></div>
+    function setStatus(msg) {
+      const bar = document.getElementById('status-bar');
+      if (msg) { bar.style.display = 'flex'; document.getElementById('status-text').textContent = msg; }
+      else        bar.style.display = 'none';
+    }
 
-<div class="realogram-outer">
-  <div class="realogram-container" id="realogramContainer"></div>
-</div>
+    function setError(msg) {
+      const el = document.getElementById('error-bar');
+      if (msg) { el.style.display = 'block'; el.textContent = msg; }
+      else        el.style.display = 'none';
+    }
 
-<div class="legend">
-  <div class="legend-item"><div class="legend-box" style="background:#b5d4f4;border:1px solid rgba(0,0,0,.1)"></div> 상품 (Normal)</div>
-  <div class="legend-item"><div class="legend-box" style="background:#f2f0ec;border:1.5px dashed #c8c5bf"></div> 빈 공간 (Empty)</div>
-  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #e8001e"></div> OOS</div>
-  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #00b0e8"></div> Misplaced</div>
-  <div class="legend-item"><div class="legend-box" style="background:white;border:3px solid #f5c800"></div> LOW</div>
-</div>
+    async function fetchAndRender() {
+      const company = document.getElementById('inp-company').value.trim();
+      const store   = document.getElementById('inp-store').value.trim();
+      const shelfId = document.getElementById('inp-shelf').value.trim();
+      if (!company || !store || !shelfId) { setError('Please fill in Company, Store, and Shelf ID.'); return; }
 
-<script>
-function sanitizeJSONText(raw) {
-  var s = raw || '';
-  var out = '';
-  for (var i = 0; i < s.length; i++) {
-    var code = s.charCodeAt(i);
-    if (code === 65279) continue;
-    if (code >= 8203 && code <= 8205) continue;
-    if (code === 8288) continue;
-    if (code === 160) { out += ' '; continue; }
-    if (code === 8220 || code === 8221) { out += '"'; continue; }
-    if (code === 8216 || code === 8217) { out += "'"; continue; }
-    out += s[i];
-  }
-  s = out;
-  var lines = s.split(/\r?\n/);
-  var kept = [];
-  for (var i = 0; i < lines.length; i++) {
-    var t = lines[i].trim();
-    if (/^`{3}[a-zA-Z]*$/.test(t)) continue;
-    if (/^[=\-]{3,}/.test(t)) continue;
-    if (/^[a-zA-Z]+$/.test(t)) continue;
-    kept.push(lines[i]);
-  }
-  s = kept.join('\n');
-  var fa = s.indexOf('['), fo = s.indexOf('{'), start = -1;
-  if (fa !== -1 && fo !== -1) start = Math.min(fa, fo);
-  else start = (fa !== -1) ? fa : fo;
-  if (start > 0) s = s.slice(start);
-  var la = s.lastIndexOf(']'), lo = s.lastIndexOf('}');
-  var end = Math.max(la, lo);
-  if (end !== -1) s = s.slice(0, end + 1);
-  s = s.replace(/,(\s*[}\]])/g, '$1');
-  return s.trim();
-}
+      setError('');
+      setStatus('Calling Vision API…');
+      document.getElementById('btn-fetch').disabled = true;
+      document.getElementById('main-content').style.display = 'none';
 
-var images        = [];
-var imageStatuses = [];
-var assignments   = {};
-var PALETTE = ['#b5d4f4','#c0dd97','#f5c4b3','#fac775','#f4c0d1','#cecbf6','#aad4c8','#f5e4a0','#d3c8f4','#b8e0d2','#f9d0a0','#c8e6c9'];
-var SAMPLE  = [{"cluster_id": 1, "cluster_bbox": [30, 20, 220, 100]}, {"cluster_id": 2, "cluster_bbox": [223, 20, 390, 100]}, {"cluster_id": 3, "cluster_bbox": [393, 20, 560, 100]}, {"cluster_id": 4, "cluster_bbox": [700, 20, 880, 100]}, {"cluster_id": 5, "cluster_bbox": [883, 20, 970, 100]}, {"cluster_id": 6, "cluster_bbox": [30, 130, 170, 210]}, {"cluster_id": 7, "cluster_bbox": [173, 130, 380, 210]}, {"cluster_id": 8, "cluster_bbox": [383, 130, 530, 210]}, {"cluster_id": 9, "cluster_bbox": [700, 130, 860, 210]}, {"cluster_id": 10, "cluster_bbox": [863, 130, 970, 210]}, {"cluster_id": 11, "cluster_bbox": [30, 240, 260, 320]}, {"cluster_id": 12, "cluster_bbox": [263, 240, 430, 320]}, {"cluster_id": 13, "cluster_bbox": [560, 240, 720, 320]}, {"cluster_id": 14, "cluster_bbox": [723, 240, 870, 320]}, {"cluster_id": 15, "cluster_bbox": [873, 240, 970, 320]}, {"cluster_id": 16, "cluster_bbox": [30, 350, 200, 430]}, {"cluster_id": 17, "cluster_bbox": [203, 350, 390, 430]}, {"cluster_id": 18, "cluster_bbox": [393, 350, 560, 430]}, {"cluster_id": 19, "cluster_bbox": [700, 350, 850, 430]}, {"cluster_id": 20, "cluster_bbox": [853, 350, 970, 430]}, {"cluster_id": 21, "cluster_bbox": [30, 460, 230, 540]}, {"cluster_id": 22, "cluster_bbox": [233, 460, 420, 540]}, {"cluster_id": 23, "cluster_bbox": [423, 460, 580, 540]}, {"cluster_id": 24, "cluster_bbox": [700, 460, 840, 540]}, {"cluster_id": 25, "cluster_bbox": [843, 460, 970, 540]}, {"cluster_id": 26, "cluster_bbox": [30, 570, 180, 650]}, {"cluster_id": 27, "cluster_bbox": [183, 570, 350, 650]}, {"cluster_id": 28, "cluster_bbox": [353, 570, 530, 650]}, {"cluster_id": 29, "cluster_bbox": [533, 570, 680, 650]}, {"cluster_id": 30, "cluster_bbox": [820, 570, 970, 650]}, {"cluster_id": 31, "cluster_bbox": [30, 680, 210, 760]}, {"cluster_id": 32, "cluster_bbox": [213, 680, 360, 760]}, {"cluster_id": 33, "cluster_bbox": [500, 680, 650, 760]}, {"cluster_id": 34, "cluster_bbox": [653, 680, 800, 760]}, {"cluster_id": 35, "cluster_bbox": [803, 680, 970, 760]}, {"cluster_id": 36, "cluster_bbox": [30, 790, 200, 870]}, {"cluster_id": 37, "cluster_bbox": [203, 790, 380, 870]}, {"cluster_id": 38, "cluster_bbox": [383, 790, 540, 870]}, {"cluster_id": 39, "cluster_bbox": [700, 790, 840, 870]}, {"cluster_id": 40, "cluster_bbox": [843, 790, 970, 870]}, {"cluster_id": 41, "cluster_bbox": [30, 900, 160, 980]}, {"cluster_id": 42, "cluster_bbox": [163, 900, 300, 980]}, {"cluster_id": 43, "cluster_bbox": [303, 900, 460, 980]}, {"cluster_id": 44, "cluster_bbox": [463, 900, 610, 980]}, {"cluster_id": 45, "cluster_bbox": [750, 900, 880, 980]}, {"cluster_id": 46, "cluster_bbox": [883, 900, 970, 980]}];
-var STATUS_LABELS = {normal:'Normal', oos:'OOS', misplaced:'Misplaced', low:'LOW'};
-var debounceTimer = null;
+      try {
+        const url = `${API_BASE}/operation/history/detail` +
+          `?company=${encodeURIComponent(company)}&store=${encodeURIComponent(store)}` +
+          `&shelfId=${encodeURIComponent(shelfId)}&floor=1F&page=0&size=10`;
 
-document.getElementById('jsonInput').value = JSON.stringify(SAMPLE, null, 2);
+        const res  = await fetch(url, { headers: { 'Authorization': `Bearer ${API_TOKEN}` } });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || `HTTP ${res.status}`);
 
-var dz = document.getElementById('dropZone');
-dz.addEventListener('dragover',  function(e){ e.preventDefault(); dz.classList.add('drag-over'); });
-dz.addEventListener('dragleave', function(){ dz.classList.remove('drag-over'); });
-dz.addEventListener('drop',      function(e){ e.preventDefault(); dz.classList.remove('drag-over'); handleFiles(e.dataTransfer.files); });
+        const detail = (data.operationHistoryInfoList || [])[0];
+        if (!detail) { setError('No data found. Please check the Shelf ID.'); setStatus(''); return; }
 
-function handleFiles(files) {
-  Array.from(files).forEach(function(f) {
-    if (!f.type.startsWith('image/')) return;
-    var r = new FileReader();
-    r.onload = function(ev) {
-      var url = ev.target.result, tmp = new Image();
-      tmp.onload = function() {
-        images.push({ url: url, name: f.name, naturalWidth: tmp.naturalWidth });
-        imageStatuses.push('normal');
-        autoAssign();
-        refreshLibrary();
-      };
-      tmp.src = url;
-    };
-    r.readAsDataURL(f);
-  });
-}
+        currentDetail = detail;
+        setStatus('Rendering canvas…');
+        await renderAll(detail);
 
-function setImageStatus(imgIdx, status) {
-  imageStatuses[imgIdx] = status;
-  refreshLibrary();
-}
-
-function refreshLibrary() {
-  var lib = document.getElementById('imgLibrary');
-  lib.innerHTML = '';
-  images.forEach(function(img, i) {
-    var st   = imageStatuses[i] || 'normal';
-    var card = document.createElement('div');
-    card.className = 'img-card' + (st !== 'normal' ? ' st-' + st : '');
-    var thumb = document.createElement('div'); thumb.className = 'thumb';
-    var im = document.createElement('img'); im.src = img.url; im.alt = '';
-    thumb.appendChild(im); card.appendChild(thumb);
-    var idx = document.createElement('span'); idx.className = 'img-idx'; idx.textContent = i+1;
-    card.appendChild(idx);
-    var rm = document.createElement('button'); rm.className = 'remove-img'; rm.textContent = 'x';
-    rm.onclick = (function(ii){ return function(){ removeImage(ii); }; })(i);
-    card.appendChild(rm);
-    var nm = document.createElement('div'); nm.className = 'img-name'; nm.textContent = img.name;
-    card.appendChild(nm);
-    var wp = document.createElement('div'); wp.className = 'img-wpx'; wp.textContent = 'W: ' + img.naturalWidth + 'px';
-    card.appendChild(wp);
-    var sRow = document.createElement('div'); sRow.className = 'img-status-row';
-    ['normal','oos','misplaced','low'].forEach(function(s) {
-      var btn = document.createElement('button');
-      btn.className = 'img-status-btn isb-' + s + (st === s ? ' active' : '');
-      btn.title = STATUS_LABELS[s];
-      btn.onclick = (function(ii, ss){ return function(){ setImageStatus(ii, ss); }; })(i, s);
-      sRow.appendChild(btn);
-    });
-    card.appendChild(sRow);
-    lib.appendChild(card);
-  });
-  var la = document.getElementById('libActions');
-  la.style.display = images.length ? 'flex' : 'none';
-  var cl = getClusters();
-  var ai = document.getElementById('assignInfo');
-  if (images.length && cl.length) {
-    var mapped = Object.keys(assignments).filter(function(cid){ return assignments[cid] !== null && assignments[cid] !== undefined; }).length;
-    ai.textContent = 'Width match 자동 매핑 · ' + images.length + '개 이미지 → ' + mapped + '개 cluster';
-  } else { ai.textContent = ''; }
-}
-
-function removeImage(i) {
-  images.splice(i, 1);
-  imageStatuses.splice(i, 1);
-  var na = {};
-  Object.keys(assignments).forEach(function(cid) {
-    var v = assignments[cid];
-    if (v === null || v === undefined) na[cid] = null;
-    else if (v === i)  na[cid] = null;
-    else if (v > i)    na[cid] = v - 1;
-    else               na[cid] = v;
-  });
-  assignments = na;
-  autoAssign();
-  refreshLibrary();
-}
-
-function clearLibrary() {
-  images = []; imageStatuses = []; assignments = {};
-  document.getElementById('fileInput').value = '';
-  refreshLibrary();
-}
-
-function parseInput(raw) {
-  var cleaned = sanitizeJSONText(raw);
-  var data;
-  try { data = JSON.parse(cleaned); }
-  catch(e1) { throw new Error('JSON 파싱 실패\n원인: ' + e1.message); }
-  if (!Array.isArray(data)) {
-    var k = Object.keys(data).find(function(key){ return Array.isArray(data[key]); });
-    if (k) data = data[k];
-    else throw new Error('JSON은 배열이어야 합니다.');
-  }
-  return data.filter(function(d){ return Array.isArray(d.cluster_bbox) && d.cluster_bbox.length === 4; });
-}
-function getClusters() { try { return parseInput(document.getElementById('jsonInput').value); } catch(e) { return []; } }
-
-function autoAssign() {
-  if (!images.length) return;
-  var cl; try { cl = parseInput(document.getElementById('jsonInput').value); } catch(e) { return; }
-  if (!cl.length) return;
-  var cs = cl.map(function(c){ return { cid: c.cluster_id, bw: c.cluster_bbox[2]-c.cluster_bbox[0] }; })
-             .sort(function(a,b){ return a.bw - b.bw; });
-  var imgs = images.map(function(img,i){ return { idx: i, nw: img.naturalWidth }; })
-                   .sort(function(a,b){ return a.nw - b.nw; });
-  cs.forEach(function(item, i){ assignments[item.cid] = imgs[i % imgs.length].idx; });
-}
-
-function onJsonChange() {
-  clearTimeout(debounceTimer);
-  debounceTimer = setTimeout(function() {
-    if (images.length) { autoAssign(); refreshLibrary(); }
-  }, 120);
-}
-
-function groupRows(clusters) {
-  var sorted = clusters.slice().sort(function(a,b){ return a.cluster_bbox[1]-b.cluster_bbox[1]; });
-  var rows = [];
-  sorted.forEach(function(c) {
-    var y1=c.cluster_bbox[1], y2=c.cluster_bbox[3], matched=false;
-    for (var i=0; i<rows.length; i++) {
-      if (Math.min(rows[i].y2,y2) > Math.max(rows[i].y1,y1)) {
-        rows[i].items.push(c); rows[i].y1=Math.min(rows[i].y1,y1); rows[i].y2=Math.max(rows[i].y2,y2); matched=true; break;
+        document.getElementById('main-content').style.display = 'block';
+        document.getElementById('btn-clear').style.display = '';
+        setStatus('');
+      } catch (e) {
+        setError('API error: ' + e.message);
+        setStatus('');
+      } finally {
+        document.getElementById('btn-fetch').disabled = false;
       }
     }
-    if (!matched) rows.push({ items:[c], y1:y1, y2:y2 });
-  });
-  rows.sort(function(a,b){ return a.y1-b.y1; });
-  rows.forEach(function(r){ r.items.sort(function(a,b){ return a.cluster_bbox[0]-b.cluster_bbox[0]; }); });
-  return rows;
-}
 
-function buildCells(rows, mult, gx1, gx2) {
-  return rows.map(function(row) {
-    var items=row.items, cells=[];
-    var avgW = items.reduce(function(s,c){ return s+c.cluster_bbox[2]-c.cluster_bbox[0]; },0) / items.length;
-    var thr  = avgW * mult;
-    if (items[0].cluster_bbox[0]-gx1 >= thr) cells.push({ type:'empty', width: items[0].cluster_bbox[0]-gx1 });
-    items.forEach(function(c, i) {
-      cells.push({ type:'product', id:c.cluster_id, width:c.cluster_bbox[2]-c.cluster_bbox[0] });
-      if (i < items.length-1) { var g=items[i+1].cluster_bbox[0]-c.cluster_bbox[2]; if(g>=thr) cells.push({type:'empty',width:g}); }
-    });
-    if (gx2-items[items.length-1].cluster_bbox[2] >= thr) cells.push({ type:'empty', width:gx2-items[items.length-1].cluster_bbox[2] });
-    return { cells:cells, thr:Math.round(thr), avg:Math.round(avgW) };
-  });
-}
+    async function renderAll(detail) {
+      const si = detail.rogShelfInfo || [];
 
-function render() {
-  var errEl=document.getElementById('errorMsg'), statsEl=document.getElementById('statsBar'), cont=document.getElementById('realogramContainer');
-  var rh   = parseInt(document.getElementById('rowHeight').value) || 120;
-  var mw   = parseInt(document.getElementById('maxWidth').value)  || 960;
-  var mult = parseFloat(document.getElementById('multiplier').value) || 0.5;
-  errEl.style.display='none'; cont.innerHTML=''; statsEl.innerHTML=''; cont.style.maxWidth=mw+'px';
-  var clusters;
-  try { clusters = parseInput(document.getElementById('jsonInput').value); }
-  catch(e) { errEl.textContent=e.message; errEl.style.display='block'; return; }
-  if (!clusters.length) { errEl.textContent='cluster_bbox 항목이 없습니다.'; errEl.style.display='block'; return; }
-  var gx1 = Math.min.apply(null, clusters.map(function(c){ return c.cluster_bbox[0]; }));
-  var gx2 = Math.max.apply(null, clusters.map(function(c){ return c.cluster_bbox[2]; }));
-  var rows = groupRows(clusters), rd = buildCells(rows, mult, gx1, gx2);
-  var tP=0, tE=0, tOos=0, tMis=0, tLow=0, tImg=0;
-  rd.forEach(function(r){ r.cells.forEach(function(c) {
-    if (c.type==='product') {
-      tP++;
-      var ix = assignments[c.id];
-      var st = (ix !== null && ix !== undefined && images[ix]) ? (imageStatuses[ix]||'normal') : 'normal';
-      if (st==='oos') tOos++; else if (st==='misplaced') tMis++; else if (st==='low') tLow++;
-      if (ix !== null && ix !== undefined && images[ix]) tImg++;
-    } else tE++;
-  }); });
-  statsEl.innerHTML =
-    '<div class="stat-pill"><div class="stat-dot" style="background:#aaa"></div>Rows: '+rows.length+'</div>'+
-    '<div class="stat-pill"><div class="stat-dot" style="background:#b5d4f4"></div>Products: '+tP+'</div>'+
-    '<div class="stat-pill"><div class="stat-dot" style="background:#c8c5bf;border:1.5px dashed #bbb"></div>Empty: '+tE+'</div>'+
-    (tOos?'<div class="stat-pill"><div class="stat-dot" style="background:#e8001e"></div>OOS: '+tOos+'</div>':'')+
-    (tMis?'<div class="stat-pill"><div class="stat-dot" style="background:#00b0e8"></div>Misplaced: '+tMis+'</div>':'')+
-    (tLow?'<div class="stat-pill"><div class="stat-dot" style="background:#f5c800;border:0.5px solid #e0b000"></div>LOW: '+tLow+'</div>':'')+
-    (tImg?'<div class="stat-pill"><div class="stat-dot" style="background:#c0dd97"></div>이미지 매핑: '+tImg+'</div>':'')+
-    '<div class="stat-pill"><div class="stat-dot" style="background:#fac775"></div>Auto thr: avg x'+mult.toFixed(2)+'</div>';
+      // Reference ROG canvas
+      if (rogRenderer) rogRenderer.destroy();
+      rogRenderer = new VROGRenderer(
+        document.getElementById('rog-container'),
+        detail.rogImage,
+        si,
+        '#eaecf1'
+      );
+      await rogRenderer.render();
 
-  rd.forEach(function(rowData, ri) {
-    var totW  = rowData.cells.reduce(function(s,c){ return s+c.width; }, 0);
-    var wrap  = document.createElement('div'); wrap.className='shelf-row-wrapper';
-    var lbl   = document.createElement('div'); lbl.className='row-label';
-    lbl.innerHTML = 'Row '+(ri+1)+'<span class="row-threshold">avg '+rowData.avg+'px<br>thr '+rowData.thr+'px</span>';
-    wrap.appendChild(lbl);
-    var rowEl = document.createElement('div'); rowEl.className='shelf-row'; rowEl.style.height=(rh+8)+'px';
-    rowData.cells.forEach(function(cell) {
-      var pct = (cell.width/totW*100).toFixed(2);
-      if (cell.type === 'product') {
-        var ix     = assignments[cell.id];
-        var imgObj = (ix !== null && ix !== undefined) ? images[ix] : null;
-        var st     = (imgObj && imageStatuses[ix]) ? imageStatuses[ix] : 'normal';
-        var el     = document.createElement('div'); el.className='r-cell'; el.style.flexBasis=pct+'%'; el.style.height=rh+'px';
-        // ★ border only, no badge text
-        if (st==='oos')            el.classList.add('border-oos');
-        else if (st==='misplaced') el.classList.add('border-misplaced');
-        else if (st==='low')       el.classList.add('border-low');
-        if (imgObj) {
-          el.classList.add('has-img');
-          var im2=document.createElement('img'); im2.src=imgObj.url; im2.alt=''; el.appendChild(im2);
-          var ov=document.createElement('span'); ov.className='cell-id-overlay'; ov.textContent='P'+cell.id; el.appendChild(ov);
-        } else {
-          el.style.background = PALETTE[(cell.id-1)%PALETTE.length];
-          var fs = Math.min(18, Math.max(9, Math.round(cell.width/14)));
-          var idDiv=document.createElement('div'); idDiv.className='cell-id'; idDiv.style.fontSize=fs+'px'; idDiv.textContent='P'+cell.id; el.appendChild(idDiv);
+      // Current shelf state canvas
+      if (shelfRenderer) shelfRenderer.destroy();
+      shelfRenderer = new VROGRenderer(
+        document.getElementById('shelf-container'),
+        detail.shelfImage,
+        si,
+        '#eaecf1'
+      );
+      await shelfRenderer.render();
+
+      buildProductLists(detail);
+    }
+
+    function buildProductLists(detail) {
+      // All products — derived from rogShelfInfo (reference state)
+      const allMap = new Map();
+      for (const row of (detail.rogShelfInfo || [])) {
+        for (const c of (row || [])) {
+          if (!c) continue;
+          const lc = c.esl_info?.[0]?.label_code || '';
+          const an = c.prd_info?.[0]?.article_name || '';
+          const k  = lc || String(allMap.size);
+          if (!allMap.has(k)) allMap.set(k, { labelCode: lc, articleName: an });
         }
-        var wpx=document.createElement('span'); wpx.className='cell-wpx'; wpx.textContent=cell.width+'px'; el.appendChild(wpx);
-        rowEl.appendChild(el);
-      } else {
-        var el=document.createElement('div'); el.className='r-cell-empty'; el.style.flexBasis=pct+'%'; el.style.height=rh+'px';
-        el.innerHTML='<div class="empty-icon"></div><div class="empty-label">Empty</div><span class="empty-wpx">'+cell.width+'px</span>';
-        rowEl.appendChild(el);
       }
-    });
-    wrap.appendChild(rowEl); cont.appendChild(wrap);
-  });
-}
+      const allProducts = [...allMap.values()];
 
-window.addEventListener('load', function(){ render(); });
-</script>
+      // Alert products — derived from shelfInfo (current state, OOS/LS/MIS only)
+      const alertProducts = [];
+      for (const row of (detail.shelfInfo || [])) {
+        for (const c of (row || [])) {
+          if (!c) continue;
+          const status = (c.status || '').toLowerCase();
+          if (ALERT_SET.has(status)) alertProducts.push({
+            labelCode:   c.eslInfo?.[0]?.labelCode || '',
+            articleName: c.articleName || '',
+            status,
+          });
+        }
+      }
+
+      // Hover on "All Products" highlights the ROG canvas
+      renderProductList('all-list',   'all-count',   allProducts,   'rog');
+      // Hover on "Alerts" highlights the current shelf canvas
+      renderProductList('alert-list', 'alert-count', alertProducts, 'shelf');
+    }
+
+    function renderProductList(listId, countId, products, highlightTarget) {
+      document.getElementById(countId).textContent = products.length;
+      const el = document.getElementById(listId);
+
+      if (!products.length) {
+        el.innerHTML = '<div class="empty-msg">None</div>';
+        return;
+      }
+
+      el.innerHTML = '';
+      for (const p of products) {
+        const row = document.createElement('div');
+        row.className = 'product-row';
+
+        const badgeHtml = p.status
+          ? `<span class="status-badge s-${p.status}">${p.status.toUpperCase()}</span>`
+          : '';
+
+        row.innerHTML =
+          `<span class="product-code">${escHtml(p.labelCode || '—')}</span>` +
+          `<span class="product-name">${escHtml(p.articleName || '—')}</span>` +
+          badgeHtml;
+
+        row.addEventListener('mouseenter', () => {
+          if (highlightTarget === 'rog'   && rogRenderer)   rogRenderer.highlightByKey(p.labelCode);
+          if (highlightTarget === 'shelf' && shelfRenderer) shelfRenderer.highlightByKey(p.labelCode);
+        });
+        row.addEventListener('mouseleave', () => {
+          if (rogRenderer)   rogRenderer.clearHighlight();
+          if (shelfRenderer) shelfRenderer.clearHighlight();
+        });
+
+        el.appendChild(row);
+      }
+    }
+
+    async function setBg(target, color, swatchEl) {
+      // Update active swatch indicator
+      const toggleId = target === 'rog' ? 'rog-bg-toggle' : 'shelf-bg-toggle';
+      document.getElementById(toggleId).querySelectorAll('.bg-swatch').forEach(s => s.classList.remove('active'));
+      swatchEl.classList.add('active');
+
+      // Sync wrapper background
+      const wrap = document.getElementById(target === 'rog' ? 'rog-container' : 'shelf-container');
+      wrap.className = 'vrog-wrap';
+      if (color === '#1a1c22') wrap.classList.add('dark-bg');
+      else if (color === '#ffffff') wrap.classList.add('white-bg');
+
+      const renderer = target === 'rog' ? rogRenderer : shelfRenderer;
+      if (renderer) await renderer.setBackgroundColor(color);
+    }
+
+    function clearAll() {
+      if (rogRenderer)   { rogRenderer.destroy();  rogRenderer   = null; }
+      if (shelfRenderer) { shelfRenderer.destroy(); shelfRenderer = null; }
+      currentDetail = null;
+      document.getElementById('main-content').style.display = 'none';
+      document.getElementById('btn-clear').style.display = 'none';
+      setError('');
+    }
+
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    // Submit on Enter key
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Enter') fetchAndRender();
+    });
+
+    // Auto-fetch with default values on page load
+    document.addEventListener('DOMContentLoaded', () => fetchAndRender());
+  </script>
 </body>
 </html>
